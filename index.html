@@ -6,6 +6,11 @@
   <title>Gourav's Habit Training Matrix</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Firebase Compatibility SDK CDNs for Multi-Device Real-Time Syncing -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
   <!-- Custom Style Overrides for Micro-Animations & Custom Scrollbars -->
   <style>
     @keyframes fadeIn {
@@ -32,7 +37,6 @@
       background: rgba(16, 185, 129, 0.4);
     }
 
-    /* Input focus visual depth overrides */
     input::placeholder {
       font-size: 10px !important;
       font-weight: 400 !important;
@@ -42,7 +46,7 @@
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-300 flex flex-col justify-between">
 
-  <!-- 🌟 PERFECT DAY CELEBRATION MODAL (Hidden by default) -->
+  <!-- 🌟 PERFECT DAY CELEBRATION MODAL -->
   <div id="perfectDayModal" class="fixed inset-0 pointer-events-none z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs hidden">
     <div class="bg-gradient-to-br from-emerald-600 to-teal-800 text-white font-black px-10 py-6 rounded-2xl shadow-2xl shadow-emerald-500/20 text-center transform scale-100 transition-transform">
       <div class="text-4xl mb-2">⚡ SYSTEM 100% ⚡</div>
@@ -55,8 +59,8 @@
   <div>
     <!-- HEADER CONTROL TERMINAL -->
     <header class="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 py-4">
-      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3 self-start sm:self-center">
           <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xl shadow-inner text-emerald-400">
             ⚡
           </div>
@@ -66,12 +70,18 @@
           </div>
         </div>
 
-        <!-- Smart Auto-Saving Pulse Badge -->
-        <div class="flex items-center gap-2">
-          <div id="saveIndicatorDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span id="saveIndicatorText" class="text-[10px] font-mono uppercase tracking-widest font-black text-slate-400 hidden sm:inline">
-            System Synced
-          </span>
+        <!-- Live Cross-Device Cloud Sync Control Panel -->
+        <div class="flex items-center gap-2.5 bg-slate-900/40 border border-slate-800/80 rounded-xl px-3 py-1.5 w-full sm:w-auto justify-between sm:justify-start">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-bold">☁️ Sync Code:</span>
+            <input id="syncCodeInput" type="text" placeholder="Set matching code" class="bg-slate-950 text-emerald-400 font-mono text-xs font-bold border border-slate-800 focus:border-emerald-500/50 rounded-lg px-2 py-1 focus:outline-hidden w-36 sm:w-44 text-center transition-colors" />
+          </div>
+          <div class="flex items-center gap-1.5 border-l border-slate-800 pl-2.5">
+            <div id="saveIndicatorDot" class="w-2 h-2 rounded-full bg-slate-600"></div>
+            <span id="saveIndicatorText" class="text-[9px] font-mono uppercase tracking-widest font-black text-slate-500 whitespace-nowrap">
+              Local Only
+            </span>
+          </div>
         </div>
       </div>
     </header>
@@ -105,10 +115,10 @@
             
             <table class="w-full border-collapse table-fixed">
               <thead id="tableHeader">
-                <!-- Programmatically Injected Headers -->
+                <!-- Injected Headers -->
               </thead>
               <tbody id="tableBody">
-                <!-- Programmatically Injected Rows -->
+                <!-- Injected Rows -->
               </tbody>
             </table>
 
@@ -121,13 +131,13 @@
             <div class="relative">
               <table class="w-full border-collapse table-fixed">
                 <tbody id="graphBody">
-                  <!-- Programmatically Injected Graph Rows -->
+                  <!-- Injected Graph Grid -->
                 </tbody>
               </table>
 
               <!-- Overlaid Vector Spline Canvas Container -->
               <div id="svgContainer" class="absolute inset-0 pointer-events-none">
-                <!-- Programmatically Injected SVG Spline Canvas -->
+                <!-- Injected SVG Line -->
               </div>
             </div>
 
@@ -170,7 +180,7 @@
     </p>
   </footer>
 
-  <!-- Vanilla Javascript State and Interaction Engine -->
+  <!-- Vanilla Javascript State and Global Sync Engine -->
   <script>
     // Hardcoded Elite Habits Matrix (9 Core Protocols)
     const TRAINED_HABITS = [
@@ -185,10 +195,7 @@
       { id: "wall_sit", name: "Wall Sit 🧱", placeholder: "Duration" }
     ];
 
-    // Starting Epoch: May 22, 2026 (Month is 0-indexed: 4 = May)
-    const START_DATE = new Date(2026, 4, 22);
-
-    // Timezone-safe local date string logic
+    const START_DATE = new Date(2026, 4, 22); // May 22, 2026
     const getLocalDateString = (date) => {
       const yyyy = date.getFullYear();
       const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -197,222 +204,239 @@
     };
 
     const todayStr = getLocalDateString(new Date());
-
-    // Generate 30 timeline dates
     const timelineDates = Array.from({ length: 30 }, (_, i) => {
       const nextDate = new Date(START_DATE);
       nextDate.setDate(START_DATE.getDate() + i);
       return nextDate;
     });
 
-    // Initialize State Engine with safe LocalStorage fetching
+    // 📊 Extracted Values from User's Website Screenshot for Day 1 (2026-05-22)
+    const baselineExtractedData = {
+      "new_idea_2026-05-22": "Yes",
+      "exercise_2026-05-22": "Yes",
+      "push_ups_2026-05-22": "10",
+      "squats_2026-05-22": "61 raps",
+      "plank_2026-05-22": "60 sec",
+      "wall_sit_2026-05-22": "60 sec"
+    };
+
+    // Local Memory Initialization with automatic merge of baseline image configurations
     let trackerState = {};
     try {
       const saved = localStorage.getItem('ht_gourav_state');
       trackerState = saved ? JSON.parse(saved) : {};
+      
+      // Inject baseline Day 1 parameters if not currently set to prevent data override
+      for (const key in baselineExtractedData) {
+        if (trackerState[key] === undefined || trackerState[key].trim() === "") {
+          trackerState[key] = baselineExtractedData[key];
+        }
+      }
+      localStorage.setItem('ht_gourav_state', JSON.stringify(trackerState));
     } catch (e) {
-      console.error("Failed to parse local storage key state", e);
-      trackerState = {};
+      trackerState = { ...baselineExtractedData };
     }
 
-    // Reference tracking for debouncing the Auto-Save indicator
-    let saveTimeout = null;
-
-    // Helper utilities
-    const getCellValue = (habitId, dateStr) => {
-      return trackerState[`${habitId}_${dateStr}`] || "";
+    // --- CLOUD CONFIGURATION INTERFACE ---
+    const firebaseConfig = {
+      databaseURL: "https://habit-tracker-sync-default-rtdb.firebaseio.com/"
     };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let currentCloudRef = null;
 
-    const isCellComplete = (habitId, dateStr) => {
-      return getCellValue(habitId, dateStr).trim().length > 0;
-    };
-
-    const getDailyScore = (dateStr) => {
-      let score = 0;
-      TRAINED_HABITS.forEach(habit => {
-        if (isCellComplete(habit.id, dateStr)) {
-          score++;
-        }
-      });
-      return score;
-    };
-
-    const isDayPerfect = (dateStr, state) => {
-      return TRAINED_HABITS.every(habit => {
-        const key = `${habit.id}_${dateStr}`;
-        const val = state[key] || "";
-        return val.trim().length > 0;
-      });
-    };
-
-    // DOM Generation
+    // DOM Target References
     const headerRow = document.getElementById('tableHeader');
     const tableBody = document.getElementById('tableBody');
     const graphBody = document.getElementById('graphBody');
     const svgContainer = document.getElementById('svgContainer');
     const perfectDayModal = document.getElementById('perfectDayModal');
-
+    const syncCodeInput = document.getElementById('syncCodeInput');
     const saveIndicatorDot = document.getElementById('saveIndicatorDot');
     const saveIndicatorText = document.getElementById('saveIndicatorText');
 
-    // Render Matrix Headers
-    function renderHeaders() {
-      let trHTML = `
-        <tr class="bg-slate-950/80">
-          <th class="w-[240px] py-4 px-4 text-left text-[11px] font-black tracking-widest text-slate-400 uppercase border-r border-b border-slate-900 sticky left-0 bg-slate-950 z-30">
-            Trained Protocols
-          </th>
-      `;
+    const getCellValue = (habitId, dateStr) => trackerState[`${habitId}_${dateStr}`] || "";
+    const isCellComplete = (habitId, dateStr) => getCellValue(habitId, dateStr).trim().length > 0;
+    
+    const getDailyScore = (dateStr) => {
+      let score = 0;
+      TRAINED_HABITS.forEach(habit => { if (isCellComplete(habit.id, dateStr)) score++; });
+      return score;
+    };
 
-      timelineDates.forEach((date, index) => {
-        const dayNum = index + 1;
+    const isDayPerfect = (dateStr, state) => {
+      return TRAINED_HABITS.every(habit => (state[`${habit.id}_${dateStr}`] || "").trim().length > 0);
+    };
+
+    // Render Table Structs once on startup
+    function buildLayoutFramework() {
+      // 1. Headers
+      let headerHTML = `<tr class="bg-slate-950/80"><th class="w-[240px] py-4 px-4 text-left text-[11px] font-black tracking-widest text-slate-400 uppercase border-r border-b border-slate-900 sticky left-0 bg-slate-950 z-30">Trained Protocols</th>`;
+      timelineDates.forEach((date, i) => {
         const dateStr = getLocalDateString(date);
         const isToday = dateStr === todayStr;
-        const dateText = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const weekdayStr = date.toLocaleDateString('en-US', { weekday: 'short' });
-
-        trHTML += `
-          <th 
-            class="w-[80px] py-3 text-center border-r border-b border-slate-900 transition-colors ${
-              isToday ? 'bg-emerald-950/20 text-emerald-400 relative' : 'bg-slate-950/40'
-            }"
-          >
-            ${isToday ? `
-              <div class="absolute top-1 left-1/2 -translate-x-1/2 text-[7px] font-mono uppercase bg-emerald-500 text-slate-950 px-1 py-0.2 rounded-sm font-black tracking-wider">
-                Today
-              </div>
-            ` : ''}
-            <div class="font-mono text-[10px] ${isToday ? 'text-emerald-400' : 'text-slate-500'}">Day ${dayNum}</div>
-            <div class="text-xs font-extrabold mt-0.5">${dateText}</div>
-            <div class="text-[9px] uppercase tracking-wider font-mono ${isToday ? 'text-emerald-300' : 'text-emerald-500/70'}">${weekdayStr}</div>
-          </th>
-        `;
+        headerHTML += `
+          <th class="w-[80px] py-3 text-center border-r border-b border-slate-900 ${isToday ? 'bg-emerald-950/20 text-emerald-400 relative' : 'bg-slate-950/40'}">
+            ${isToday ? '<div class="absolute top-1 left-1/2 -translate-x-1/2 text-[7px] font-mono uppercase bg-emerald-500 text-slate-950 px-1 py-0.2 rounded-sm font-black tracking-wider">Today</div>' : ''}
+            <div class="font-mono text-[10px] ${isToday ? 'text-emerald-400' : 'text-slate-500'}">Day ${i + 1}</div>
+            <div class="text-xs font-extrabold mt-0.5">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+            <div class="text-[9px] uppercase tracking-wider font-mono ${isToday ? 'text-emerald-300' : 'text-emerald-500/70'}">${date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+          </th>`;
       });
+      headerRow.innerHTML = headerHTML + `</tr>`;
 
-      trHTML += `</tr>`;
-      headerRow.innerHTML = trHTML;
-    }
-
-    // Render Interactive Inputs
-    function renderMatrixBody() {
+      // 2. Data Rows
       let bodyHTML = '';
-
       TRAINED_HABITS.forEach((habit, hIdx) => {
-        bodyHTML += `
-          <tr class="hover:bg-slate-900/20 transition-colors">
-            <td class="w-[240px] py-3.5 px-4 border-r border-b border-slate-900 sticky left-0 bg-slate-950 z-20 font-bold text-xs text-slate-100">
-              ${hIdx + 1}. ${habit.name}
-            </td>
-        `;
-
-        timelineDates.forEach((date, dIdx) => {
+        bodyHTML += `<tr class="hover:bg-slate-900/20 transition-colors"><td class="w-[240px] py-3.5 px-4 border-r border-b border-slate-900 sticky left-0 bg-slate-950 z-20 font-bold text-xs text-slate-100">${hIdx + 1}. ${habit.name}</td>`;
+        timelineDates.forEach((date) => {
           const dateStr = getLocalDateString(date);
-          const val = getCellValue(habit.id, dateStr);
-          const isFilled = val.trim().length > 0;
-          const isToday = dateStr === todayStr;
-
           bodyHTML += `
-            <td 
-              class="p-1.5 border-r border-b border-slate-900 transition-all ${
-                isFilled 
-                  ? 'bg-emerald-950/15' 
-                  : isToday 
-                  ? 'bg-emerald-950/5'
-                  : 'bg-slate-950/10'
-              }"
-              id="cell_container_${habit.id}_${dateStr}"
-            >
-              <input
-                type="text"
-                value="${val.replace(/"/g, '&quot;')}"
-                placeholder="${habit.placeholder}"
-                data-habit-id="${habit.id}"
-                data-date-str="${dateStr}"
-                class="cell-input w-full h-8 text-center text-xs font-bold rounded-md bg-transparent focus:outline-hidden transition-all ${
-                  isFilled
-                    ? 'text-emerald-300 border border-emerald-500/45 bg-emerald-500/5 shadow-inner shadow-emerald-500/10'
-                    : isToday
-                    ? 'text-slate-400 border border-emerald-500/25 focus:border-emerald-500/50'
-                    : 'text-slate-500 border border-slate-800/60 focus:border-slate-700'
-                }"
-              />
-            </td>
-          `;
+            <td class="p-1.5 border-r border-b border-slate-900 transition-all" id="cell_container_${habit.id}_${dateStr}">
+              <input type="text" data-habit-id="${habit.id}" data-date-str="${dateStr}" class="cell-input w-full h-8 text-center text-xs font-bold rounded-md bg-transparent focus:outline-hidden transition-all" placeholder="${habit.placeholder}" />
+            </td>`;
         });
-
         bodyHTML += `</tr>`;
       });
-
       tableBody.innerHTML = bodyHTML;
 
-      // Bind real-time input change listeners
+      // 3. Graph Backdrop
+      let graphHTML = '';
+      for (let score = 9; score >= 1; score--) {
+        graphHTML += `<tr class="h-7"><td class="w-[240px] py-0.5 px-4 border-r border-b border-slate-900 text-left font-mono font-bold text-[10px] text-slate-500 sticky left-0 bg-slate-950 z-20"><div class="flex items-center justify-between"><span>Target Level</span><span class="px-1.5 py-0.5 rounded-sm font-black bg-slate-900 text-emerald-400">${score}</span></div></td>`;
+        timelineDates.forEach((date) => {
+          graphHTML += `<td class="w-[80px] border-r border-b border-slate-900/40 relative ${getLocalDateString(date) === todayStr ? 'bg-emerald-950/5' : ''}"><div class="absolute top-0 bottom-0 left-1/2 w-px border-l border-dashed pointer-events-none ${getLocalDateString(date) === todayStr ? 'border-emerald-500/15' : 'border-slate-900/35'}"></div></td>`;
+        });
+        graphHTML += `</tr>`;
+      }
+      graphHTML += `<tr class="bg-slate-950/80"><td class="w-[240px] py-3 px-4 border-r border-slate-900 text-left font-mono font-black text-[10px] text-slate-400 sticky left-0 bg-slate-950 z-20 uppercase tracking-widest">System Efficiency</td>`;
+      timelineDates.forEach((date) => {
+        graphHTML += `<td id="efficiency_${getLocalDateString(date)}" class="w-[80px] text-center font-mono font-black text-xs border-r border-slate-900 ${getLocalDateString(date) === todayStr ? 'bg-emerald-950/10' : ''}"></td>`;
+      });
+      graphBody.innerHTML = graphHTML + `</tr>`;
+
+      // Bind Input Events
       document.querySelectorAll('.cell-input').forEach(input => {
         input.addEventListener('input', (e) => {
-          const habitId = e.target.getAttribute('data-habit-id');
-          const dateStr = e.target.getAttribute('data-date-str');
-          const textValue = e.target.value;
-          handleCellUpdate(habitId, dateStr, textValue, e.target);
+          updateCellState(e.target.getAttribute('data-habit-id'), e.target.getAttribute('data-date-str'), e.target.value);
         });
       });
     }
 
-    // Render Bottom Trend Graph Grid
-    function renderGraphGrid() {
-      let trHTML = '';
+    // Sync state visual interface injector
+    function syncUIFromState() {
+      const activeElement = document.activeElement;
+      const activeHabitId = activeElement ? activeElement.getAttribute('data-habit-id') : null;
+      const activeDateStr = activeElement ? activeElement.getAttribute('data-date-str') : null;
 
-      // Score lines from 9 down to 1
-      for (let score = 9; score >= 1; score--) {
-        trHTML += `
-          <tr class="h-7">
-            <td class="w-[240px] py-0.5 px-4 border-r border-b border-slate-900 text-left font-mono font-bold text-[10px] text-slate-500 sticky left-0 bg-slate-950 z-20">
-              <div class="flex items-center justify-between">
-                <span>Target Level</span>
-                <span class="px-1.5 py-0.5 rounded-sm font-black bg-slate-900 text-emerald-400">${score}</span>
-              </div>
-            </td>
-        `;
+      document.querySelectorAll('.cell-input').forEach(input => {
+        const hId = input.getAttribute('data-habit-id');
+        const dStr = input.getAttribute('data-date-str');
+        const val = getCellValue(hId, dStr);
 
-        timelineDates.forEach((date, dIdx) => {
-          const dateStr = getLocalDateString(date);
-          const isToday = dateStr === todayStr;
+        if (hId === activeHabitId && dStr === activeDateStr) return;
 
-          trHTML += `
-            <td class="w-[80px] border-r border-b border-slate-900/40 relative ${isToday ? 'bg-emerald-950/5' : ''}">
-              <div class="absolute top-0 bottom-0 left-1/2 w-px border-l border-dashed pointer-events-none ${
-                isToday ? 'border-emerald-500/15' : 'border-slate-900/35'
-              }"></div>
-            </td>
-          `;
-        });
+        if (input.value !== val) input.value = val;
 
-        trHTML += `</tr>`;
-      }
+        const container = document.getElementById(`cell_container_${hId}_${dStr}`);
+        const isFilled = val.trim().length > 0;
+        const isToday = dStr === todayStr;
 
-      // Bottom Row Percent Indicator
-      trHTML += `
-        <tr class="bg-slate-950/80">
-          <td class="w-[240px] py-3 px-4 border-r border-slate-900 text-left font-mono font-black text-[10px] text-slate-400 sticky left-0 bg-slate-950 z-20 uppercase tracking-widest">
-            System Efficiency
-          </td>
-      `;
-
-      timelineDates.forEach((date, dIdx) => {
-        const dateStr = getLocalDateString(date);
-        const isToday = dateStr === todayStr;
-
-        trHTML += `
-          <td 
-            id="efficiency_${dateStr}" 
-            class="w-[80px] text-center font-mono font-black text-xs border-r border-slate-900 ${isToday ? 'bg-emerald-950/10' : ''}"
-          >
-            <!-- Injected percentage dynamically -->
-          </td>
-        `;
+        if (isFilled) {
+          container.className = `p-1.5 border-r border-b border-slate-900 bg-emerald-950/15 transition-all`;
+          input.className = `cell-input w-full h-8 text-center text-xs font-bold rounded-md bg-transparent focus:outline-hidden transition-all text-emerald-300 border border-emerald-500/45 bg-emerald-500/5 shadow-inner shadow-emerald-500/10`;
+        } else {
+          container.className = `p-1.5 border-r border-b border-slate-900 transition-all ${isToday ? 'bg-emerald-950/5' : 'bg-slate-950/10'}`;
+          input.className = `cell-input w-full h-8 text-center text-xs font-bold rounded-md bg-transparent focus:outline-hidden transition-all ${isToday ? 'text-slate-400 border border-emerald-500/25 focus:border-emerald-500/50' : 'text-slate-500 border border-slate-800/60 focus:border-slate-700'}`;
+        }
       });
 
-      trHTML += `</tr>`;
-      graphBody.innerHTML = trHTML;
-      updateEfficiencyMetrics();
+      timelineDates.forEach(date => {
+        const dStr = getLocalDateString(date);
+        const score = getDailyScore(dStr);
+        const cell = document.getElementById(`efficiency_${dStr}`);
+        if (cell) cell.innerHTML = `<div class="py-1 text-[10px] ${score === 9 ? 'text-emerald-400 font-extrabold' : 'text-slate-400'}">${Math.round((score / 9) * 100)}%</div>`;
+      });
+
+      drawSplineChart();
+    }
+
+    // Handle Local Value Mutations
+    function updateCellState(habitId, dateStr, value) {
+      setVisualStatus('saving');
+      const previouslyPerfect = isDayPerfect(dateStr, trackerState);
+
+      trackerState[`${habitId}_${dateStr}`] = value;
+      localStorage.setItem('ht_gourav_state', JSON.stringify(trackerState));
+
+      // Double write directly to Cloud Node if Sync Code is operational
+      if (currentCloudRef) {
+        currentCloudRef.child(`${habitId}_${dateStr}`).set(value);
+      }
+
+      syncUIFromState();
+
+      if (isDayPerfect(dateStr, trackerState) && !previouslyPerfect) {
+        perfectDayModal.classList.remove('hidden');
+        setTimeout(() => perfectDayModal.classList.add('hidden'), 3000);
+      }
+      
+      if (!currentCloudRef) setTimeout(() => setVisualStatus('local'), 300);
+    }
+
+    // Real-Time Cloud Subscription Synchronization Handler
+    function initializeCloudSynchronization(codeWord) {
+      if (currentCloudRef) currentCloudRef.off();
+
+      if (!codeWord.trim()) {
+        currentCloudRef = null;
+        setVisualStatus('local');
+        return;
+      }
+
+      setVisualStatus('syncing');
+      
+      const secureKey = codeWord.trim().replace(/[^a-zA-O0-9-_]/g, '_');
+      currentCloudRef = db.ref(`matrices/${secureKey}`);
+
+      // Double-check if cloud partition contains any values. If blank, initialize with user's starting state.
+      currentCloudRef.once('value', (snapshot) => {
+        if (!snapshot.exists()) {
+          currentCloudRef.set(trackerState);
+        }
+      });
+
+      // Bind dynamic real-time stream downstream
+      currentCloudRef.on('value', (snapshot) => {
+        if (snapshot.exists()) {
+          trackerState = snapshot.val() || {};
+          localStorage.setItem('ht_gourav_state', JSON.stringify(trackerState));
+          syncUIFromState();
+        }
+        setVisualStatus('cloud');
+      }, (error) => {
+        console.error("Cloud synchronization connection closed.", error);
+        setVisualStatus('local');
+      });
+    }
+
+    function setVisualStatus(mode) {
+      if (mode === 'saving') {
+        saveIndicatorDot.className = "w-2 h-2 rounded-full bg-amber-500 animate-ping";
+        saveIndicatorText.innerText = "Syncing...";
+      } else if (mode === 'syncing') {
+        saveIndicatorDot.className = "w-2 h-2 rounded-full bg-blue-500 animate-pulse";
+        saveIndicatorText.innerText = "Connecting...";
+      } else if (mode === 'cloud') {
+        saveIndicatorDot.className = "w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400";
+        saveIndicatorText.className = "text-[9px] font-mono uppercase tracking-widest font-black text-emerald-400";
+        saveIndicatorText.innerText = "Cloud Active";
+      } else {
+        saveIndicatorDot.className = "w-2 h-2 rounded-full bg-slate-600";
+        saveIndicatorText.className = "text-[9px] font-mono uppercase tracking-widest font-black text-slate-500";
+        saveIndicatorText.innerText = "Local Only";
+      }
     }
 
     // Dynamic Spline Calculations and Path Construction
@@ -430,171 +454,37 @@
         points.push({ x, y, score });
       });
 
-      if (points.length === 0) {
-        svgContainer.innerHTML = '';
-        return;
-      }
+      if (points.length === 0) { svgContainer.innerHTML = ''; return; }
 
-      // Create cubic bezier curve math strings
       let pathD = `M ${points[0].x} ${points[0].y}`;
       for (let i = 1; i < points.length; i++) {
-        const p0 = points[i - 1];
-        const p1 = points[i];
-        const cpX1 = p0.x + (p1.x - p0.x) / 3;
-        const cpY1 = p0.y;
-        const cpX2 = p0.x + 2 * (p1.x - p0.x) / 3;
-        const cpY2 = p1.y;
-        pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
+        const p0 = points[i - 1]; const p1 = points[i];
+        pathD += ` C ${p0.x + (p1.x - p0.x) / 3} ${p0.y}, ${p0.x + 2 * (p1.x - p0.x) / 3} ${p1.y}, ${p1.x} ${p1.y}`;
       }
 
-      // Generate dynamic SVG Nodes
-      let svgHTML = `
-        <svg class="w-full h-full pointer-events-none z-10 overflow-visible">
-          <!-- Glow Shadow -->
-          <path
-            d="${pathD}"
-            fill="none"
-            stroke="rgba(16, 185, 129, 0.12)"
-            stroke-width="10"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <!-- Core Line -->
-          <path
-            d="${pathD}"
-            fill="none"
-            stroke="#10B981"
-            stroke-width="3"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="transition-all duration-300"
-          />
-      `;
-
-      // Plot actual indicators
+      let svgHTML = `<svg class="w-full h-full pointer-events-none z-10 overflow-visible"><path d="${pathD}" fill="none" stroke="rgba(16, 185, 129, 0.12)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="${pathD}" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="transition-all duration-300"/>`;
       points.forEach(pt => {
-        svgHTML += `
-          <g>
-            <circle
-              cx="${pt.x}"
-              cy="${pt.y}"
-              r="5"
-              fill="#10B981"
-              stroke="#020617"
-              stroke-width="2"
-              class="transition-transform hover:scale-150 duration-200"
-            />
-            ${pt.score > 0 ? `
-              <text
-                x="${pt.x}"
-                y="${pt.y - 12}"
-                text-anchor="middle"
-                font-size="9"
-                font-weight="900"
-                fill="#34D399"
-                style="user-select: none; font-family: monospace;"
-              >
-                ${pt.score}
-              </text>
-            ` : ''}
-          </g>
-        `;
+        svgHTML += `<g><circle cx="${pt.x}" cy="${pt.y}" r="5" fill="#10B981" stroke="#020617" stroke-width="2" class="transition-transform hover:scale-150 duration-200" />${pt.score > 0 ? `<text x="${pt.x}" y="${pt.y - 12}" text-anchor="middle" font-size="9" font-weight="900" fill="#34D399" style="user-select: none; font-family: monospace;">${pt.score}</text>` : ''}</g>`;
       });
-
-      svgHTML += `</svg>`;
-      svgContainer.innerHTML = svgHTML;
+      svgContainer.innerHTML = svgHTML + `</svg>`;
     }
 
-    // Handles user typing values inside inputs
-    function handleCellUpdate(habitId, dateStr, textValue, inputEl) {
-      // Toggle auto-saving pulse state
-      saveIndicatorDot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping";
-      saveIndicatorText.innerText = "Saving...";
-
-      const previouslyPerfect = isDayPerfect(dateStr, trackerState);
-
-      // Mutate state instantly
-      trackerState[`${habitId}_${dateStr}`] = textValue;
-
-      // Sync safely to physical storage
-      localStorage.setItem('ht_gourav_state', JSON.stringify(trackerState));
-
-      // Handle custom style assignments for filled/empty elements
-      const container = document.getElementById(`cell_container_${habitId}_${dateStr}`);
-      const isFilled = textValue.trim().length > 0;
-      const isToday = dateStr === todayStr;
-
-      if (isFilled) {
-        container.className = `p-1.5 border-r border-b border-slate-900 bg-emerald-950/15 transition-all`;
-        inputEl.className = `cell-input w-full h-8 text-center text-xs font-bold rounded-md bg-transparent focus:outline-hidden transition-all text-emerald-300 border border-emerald-500/45 bg-emerald-500/5 shadow-inner shadow-emerald-500/10`;
-      } else {
-        container.className = `p-1.5 border-r border-b border-slate-900 transition-all ${
-          isToday ? 'bg-emerald-950/5' : 'bg-slate-950/10'
-        }`;
-        inputEl.className = `cell-input w-full h-8 text-center text-xs font-bold rounded-md bg-transparent focus:outline-hidden transition-all ${
-          isToday
-            ? 'text-slate-400 border border-emerald-500/25 focus:border-emerald-500/50'
-            : 'text-slate-500 border border-slate-800/60 focus:border-slate-700'
-        }`;
-      }
-
-      // Recalculate metrics
-      updateEfficiencyMetrics();
-      drawSplineChart();
-
-      // Check if day was newly perfected
-      const currentlyPerfect = isDayPerfect(dateStr, trackerState);
-      if (currentlyPerfect && !previouslyPerfect) {
-        triggerPerfectDayCelebration();
-      }
-
-      // Reset auto-save indicators with simple debounce
-      if (saveTimeout) clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => {
-        saveIndicatorDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
-        saveIndicatorText.innerText = "System Synced";
-      }, 300);
-    }
-
-    // Refresh percentage metrics at bottom of matrix columns
-    function updateEfficiencyMetrics() {
-      timelineDates.forEach(date => {
-        const dateStr = getLocalDateString(date);
-        const score = getDailyScore(dateStr);
-        const percent = Math.round((score / 9) * 100);
-        const cell = document.getElementById(`efficiency_${dateStr}`);
-        
-        if (cell) {
-          cell.innerHTML = `
-            <div class="py-1 text-[10px] ${score === 9 ? 'text-emerald-400 font-extrabold' : 'text-slate-400'}">
-              ${percent}%
-            </div>
-          `;
-        }
-      });
-    }
-
-    // Triggers perfect performance modal notification
-    function triggerPerfectDayCelebration() {
-      perfectDayModal.classList.remove('hidden');
-      perfectDayModal.classList.add('flex');
-      setTimeout(() => {
-        perfectDayModal.classList.add('hidden');
-        perfectDayModal.classList.remove('flex');
-      }, 3000);
-    }
-
-    // Load elements on runtime start
+    // Global Initializers
     window.onload = function() {
-      renderHeaders();
-      renderMatrixBody();
-      renderGraphGrid();
+      buildLayoutFramework();
       
-      // Paint vector graphs on window mount
-      drawSplineChart();
+      const cachedSyncCode = localStorage.getItem('ht_gourav_synccode') || "";
+      syncCodeInput.value = cachedSyncCode;
+      
+      syncUIFromState();
+      if (cachedSyncCode) initializeCloudSynchronization(cachedSyncCode);
+
+      syncCodeInput.addEventListener('change', (e) => {
+        localStorage.setItem('ht_gourav_synccode', e.target.value);
+        initializeCloudSynchronization(e.target.value);
+      });
     };
 
-    // Keep graph vector precise when scaling/rotating windows
     window.addEventListener('resize', drawSplineChart);
   </script>
 </body>
