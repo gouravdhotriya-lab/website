@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gourav's Habit Training Matrix</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Custom Style Overrides for Micro-Animations & Custom Scrollbars -->
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(1.05); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Elegant Custom Scrollbar Styling */
+    .scrollbar-thin::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: rgba(2, 6, 23, 0.4);
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.2);
+      border-radius: 9999px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+      background: rgba(16, 185, 129, 0.4);
+    }
+
+    /* Input focus visual depth overrides */
+    input::placeholder {
+      font-size: 10px !important;
+      font-weight: 400 !important;
+      opacity: 0.25 !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-300 flex flex-col justify-between">
+
+  <!-- 🌟 PERFECT DAY CELEBRATION MODAL (Hidden by default) -->
+  <div id="perfectDayModal" class="fixed inset-0 pointer-events-none z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs hidden">
+    <div class="bg-gradient-to-br from-emerald-600 to-teal-800 text-white font-black px-10 py-6 rounded-2xl shadow-2xl shadow-emerald-500/20 text-center transform scale-100 transition-transform">
+      <div class="text-4xl mb-2">⚡ SYSTEM 100% ⚡</div>
+      <div class="text-sm font-medium tracking-widest text-emerald-200">
+        Gourav, you have achieved absolute consistency today!
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <!-- HEADER CONTROL TERMINAL -->
+    <header class="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 py-4">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xl shadow-inner text-emerald-400">
+            ⚡
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-black tracking-wider text-white uppercase leading-none">Gourav's Habit Training Matrix</h1>
+            <p class="text-[10px] sm:text-xs text-emerald-500/70 font-mono mt-1">Systemized Performance Cohort: May 22, 2026</p>
+          </div>
+        </div>
+
+        <!-- Smart Auto-Saving Pulse Badge -->
+        <div class="flex items-center gap-2">
+          <div id="saveIndicatorDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span id="saveIndicatorText" class="text-[10px] font-mono uppercase tracking-widest font-black text-slate-400 hidden sm:inline">
+            System Synced
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CORE WORKSPACE -->
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 w-full">
+      
+      <!-- Profile Card Summary -->
+      <div class="mb-6 bg-slate-900/40 border border-slate-900 rounded-2xl p-4 sm:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div class="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-slate-500">Trainee Athlete</div>
+          <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Gourav Rathod</h2>
+          <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Focusing strictly on performance optimization and system training.</p>
+        </div>
+        <div class="flex gap-6 sm:gap-8 w-full md:w-auto justify-between sm:justify-start border-t border-slate-900/60 pt-3 md:pt-0 md:border-t-0">
+          <div class="md:border-l md:border-slate-800 md:pl-4">
+            <span class="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-slate-500 block">Start Date</span>
+            <span class="text-xs sm:text-sm font-mono font-bold text-emerald-400">22-05-2026</span>
+          </div>
+          <div class="md:border-l md:border-slate-800 md:pl-4">
+            <span class="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-slate-500 block">Total Cohort</span>
+            <span class="text-xs sm:text-sm font-mono font-bold text-slate-300">30 Days Elite</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Habit Matrix Table Container -->
+      <div class="bg-slate-900/20 border border-slate-900 rounded-2xl p-3 sm:p-6 shadow-2xl overflow-hidden">
+        <div class="overflow-x-auto rounded-xl border border-slate-900 scrollbar-thin scrollbar-thumb-slate-800">
+          <div class="min-w-[2640px] relative">
+            
+            <table class="w-full border-collapse table-fixed">
+              <thead id="tableHeader">
+                <!-- Programmatically Injected Headers -->
+              </thead>
+              <tbody id="tableBody">
+                <!-- Programmatically Injected Rows -->
+              </tbody>
+            </table>
+
+            <!-- SECTION SPLITTER AND SCORES HEADER -->
+            <div class="h-8 border-b border-slate-900 flex items-center justify-center bg-slate-950/40 text-center text-[10px] uppercase tracking-widest font-black text-slate-500">
+              📈 PERFORMANCE GRAPH LINE (Daily Execution Volume)
+            </div>
+
+            <!-- Dynamic Line-Chart Node Field Container -->
+            <div class="relative">
+              <table class="w-full border-collapse table-fixed">
+                <tbody id="graphBody">
+                  <!-- Programmatically Injected Graph Rows -->
+                </tbody>
+              </table>
+
+              <!-- Overlaid Vector Spline Canvas Container -->
+              <div id="svgContainer" class="absolute inset-0 pointer-events-none">
+                <!-- Programmatically Injected SVG Spline Canvas -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- SCIENTIFIC INFORMATION & DISCIPLINE SUMMARY -->
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-5 rounded-2xl bg-slate-900/30 border border-slate-900">
+          <div class="text-xl mb-2">🧠</div>
+          <h4 class="text-xs uppercase font-black tracking-widest text-slate-400">Cognitive Focus</h4>
+          <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+            This protocol focuses purely on positive physical training and creative implementation. Avoid dopamine-exhausting behavior patterns by sticking to your scheduled system limits.
+          </p>
+        </div>
+        <div class="p-5 rounded-2xl bg-slate-900/30 border border-slate-900">
+          <div class="text-xl mb-2">⏱️</div>
+          <h4 class="text-xs uppercase font-black tracking-widest text-slate-400">Quantitative Accountability</h4>
+          <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+            Write specific performance metrics inside cells (e.g. your squat rep count, reading duration, or plank time). Leave blank only when incomplete.
+          </p>
+        </div>
+        <div class="p-5 rounded-2xl bg-slate-900/30 border border-slate-900">
+          <div class="text-xl mb-2">🤝</div>
+          <h4 class="text-xs uppercase font-black tracking-widest text-slate-400">Implementation Mastery</h4>
+          <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+            Tracking starts on May 22, 2026. Daily actions reinforce the pathways for long-term consistency. Keep the cycle strong!
+          </p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- COMPACT FOOTER -->
+  <footer class="w-full py-4 border-t border-slate-900/85 mt-12 bg-slate-950 text-center">
+    <p class="text-[10px] uppercase font-mono tracking-widest text-slate-500">
+      Gourav Rathod Elite Protocol Suite • May 22 Cohort
+    </p>
+  </footer>
+
+  <!-- Vanilla Javascript State and Interaction Engine -->
+  <script>
+    // Hardcoded Elite Habits Matrix (9 Core Protocols)
+    const TRAINED_HABITS = [
+      { id: "wake_up", name: "4 AM Wake Up 🌅", placeholder: "Time/Yes" },
+      { id: "no_junk", name: "No Junk Food 🥗", placeholder: "Eaten/Safe" },
+      { id: "hindi_reading", name: "Hindi Reading (Sudha Murty) 📚", placeholder: "Pages/Mins" },
+      { id: "new_idea", name: "Find New Idea & Implement It 💡", placeholder: "What idea?" },
+      { id: "exercise", name: "Exercise 🏋️", placeholder: "Type/Mins" },
+      { id: "push_ups", name: "Push-Ups 🦾", placeholder: "Reps" },
+      { id: "squats", name: "Squats 🦵", placeholder: "Reps" },
+      { id: "plank", name: "Plank ⏱️", placeholder: "Duration" },
+      { id: "wall_sit", name: "Wall Sit 🧱", placeholder: "Duration" }
+    ];
+
+    // Starting Epoch: May 22, 2026 (Month is 0-indexed: 4 = May)
+    const START_DATE = new Date(2026, 4, 22);
+
+    // Timezone-safe local date string logic
+    const getLocalDateString = (date) => {
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    const todayStr = getLocalDateString(new Date());
+
+    // Generate 30 timeline dates
+    const timelineDates = Array.from({ length: 30 }, (_, i) => {
+      const nextDate = new Date(START_DATE);
+      nextDate.setDate(START_DATE.getDate() + i);
+      return nextDate;
+    });
+
+    // Initialize State Engine with safe LocalStorage fetching
+    let trackerState = {};
+    try {
+      const saved = localStorage.getItem('ht_gourav_state');
+      trackerState = saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      console.error("Failed to parse local storage key state", e);
+      trackerState = {};
+    }
+
+    // Reference tracking for debouncing the Auto-Save indicator
+    let saveTimeout = null;
+
+    // Helper utilities
+    const getCellValue = (habitId, dateStr) => {
+      return trackerState[`${habitId}_${dateStr}`] || "";
+    };
+
+    const isCellComplete = (habitId, dateStr) => {
+      return getCellValue(habitId, dateStr).trim().length > 0;
+    };
+
+    const getDailyScore = (dateStr) => {
+      let score = 0;
+      TRAINED_HABITS.forEach(habit => {
+        if (isCellComplete(habit.id, dateStr)) {
+          score++;
+        }
+      });
+      return score;
+    };
+
+    const isDayPerfect = (dateStr, state) => {
+      return TRAINED_HABITS.every(habit => {
+        const key = `${habit.id}_${dateStr}`;
+        const val = state[key] || "";
+        return val.trim().length > 0;
+      });
+    };
+
+    // DOM Generation
+    const headerRow = document.getElementById('tableHeader');
+    const tableBody = document.getElementById('tableBody');
+    const graphBody = document.getElementById('graphBody');
+    const svgContainer = document.getElementById('svgContainer');
+    const perfectDayModal = document.getElementById('perfectDayModal');
+
+    const saveIndicatorDot = document.getElementById('saveIndicatorDot');
+    const saveIndicatorText = document.getElementById('saveIndicatorText');
+
+    // Render Matrix Headers
+    function renderHeaders() {
+      let trHTML = `
+        <tr class="bg-slate-950/80">
+          <th class="w-[240px] py-4 px-4 text-left text-[11px] font-black tracking-widest text-slate-400 uppercase border-r border-b border-slate-900 sticky left-0 bg-slate-950 z-30">
+            Trained Protocols
+          </th>
+      `;
+
+      timelineDates.forEach((date, index) => {
+        const dayNum = index + 1;
+        const dateStr = getLocalDateString(date);
+        const isToday = dateStr === todayStr;
+        const dateText = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const weekdayStr = date.toLocaleDateString('en-US', { weekday: 'short' });
+
+        trHTML += `
+          <th 
+            class="w-[80px] py-3 text-center border-r border-b border-slate-900 transition-colors ${
+              isToday ? 'bg-emerald-950/20 text-emerald-400 relative' : 'bg-slate-950/40'
+            }"
+          >
+            ${isToday ? `
+              <div class="absolute top-1 left-1/2 -translate-x-1/2 text-[7px] font-mono uppercase bg-emerald-500 text-slate-950 px-1 py-0.2 rounded-sm font-black tracking-wider">
+                Today
+              </div>
+            ` : ''}
+            <div class="font-mono text-[10px] ${isToday ? 'text-emerald-400' : 'text-slate-500'}">Day ${dayNum}</div>
+            <div class="text-xs font-extrabold mt-0.5">${dateText}</div>
+            <div class="text-[9px] uppercase tracking-wider font-mono ${isToday ? 'text-emerald-300' : 'text-emerald-500/70'}">${weekdayStr}</div>
+          </th>
+        `;
+      });
+
+      trHTML += `</tr>`;
+      headerRow.innerHTML = trHTML;
+    }
+
+    // Render Interactive Inputs
+    function renderMatrixBody() {
+      let bodyHTML = '';
+
+      TRAINED_HABITS.forEach((habit, hIdx) => {
+        bodyHTML += `
+          <tr class="hover:bg-slate-900/20 transition-colors">
+            <td class="w-[240px] py-3.5 px-4 border-r border-b border-slate-900 sticky left-0 bg-slate-950 z-20 font-bold text-xs text-slate-100">
+              ${hIdx + 1}. ${habit.name}
+            </td>
+        `;
+
+        timelineDates.forEach((date, dIdx) => {
+          const dateStr = getLocalDateString(date);
+          const val = getCellValue(habit.id, dateStr);
+          const isFilled = val.trim().length > 0;
+          const isToday = dateStr === todayStr;
+
+          bodyHTML += `
+            <td 
+              class="p-1.5 border-r border-b border-slate-900 transition-all ${
+                isFilled 
+                  ? 'bg-emerald-950/15' 
+                  : isToday 
+                  ? 'bg-emerald-950/5'
+                  : 'bg-slate-950/10'
+              }"
+              id="cell_container_${habit.id}_${dateStr}"
+            >
+              <input
+                type="text"
+                value="${val.replace(/"/g, '&quot;')}"
+                placeholder="${habit.placeholder}"
+                data-habit-id="${habit.id}"
+                data-date-str="${dateStr}"
+                class="cell-input w-full h-8 text-center text-xs font-bold rounded-md bg-transparent focus:outline-hidden transition-all ${
+                  isFilled
+                    ? 'text-emerald-300 border border-emerald-500/45 bg-emerald-500/5 shadow-inner shadow-emerald-500/10'
+                    : isToday
+                    ? 'text-slate-400 border border-emerald-500/25 focus:border-emerald-500/50'
+                    : 'text-slate-500 border border-slate-800/60 focus:border-slate-700'
+                }"
+              />
+            </td>
+          `;
+        });
+
+        bodyHTML += `</tr>`;
+      });
+
+      tableBody.innerHTML = bodyHTML;
+
+      // Bind real-time input change listeners
+      document.querySelectorAll('.cell-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const habitId = e.target.getAttribute('data-habit-id');
+          const dateStr = e.target.getAttribute('data-date-str');
+          const textValue = e.target.value;
+          handleCellUpdate(habitId, dateStr, textValue, e.target);
+        });
+      });
+    }
+
+    // Render Bottom Trend Graph Grid
+    function renderGraphGrid() {
+      let trHTML = '';
+
+      // Score lines from 9 down to 1
+      for (let score = 9; score >= 1; score--) {
+        trHTML += `
+          <tr class="h-7">
+            <td class="w-[240px] py-0.5 px-4 border-r border-b border-slate-900 text-left font-mono font-bold text-[10px] text-slate-500 sticky left-0 bg-slate-950 z-20">
+              <div class="flex items-center justify-between">
+                <span>Target Level</span>
+                <span class="px-1.5 py-0.5 rounded-sm font-black bg-slate-900 text-emerald-400">${score}</span>
+              </div>
+            </td>
+        `;
+
+        timelineDates.forEach((date, dIdx) => {
+          const dateStr = getLocalDateString(date);
+          const isToday = dateStr === todayStr;
+
+          trHTML += `
+            <td class="w-[80px] border-r border-b border-slate-900/40 relative ${isToday ? 'bg-emerald-950/5' : ''}">
+              <div class="absolute top-0 bottom-0 left-1/2 w-px border-l border-dashed pointer-events-none ${
+                isToday ? 'border-emerald-500/15' : 'border-slate-900/35'
+              }"></div>
+            </td>
+          `;
+        });
+
+        trHTML += `</tr>`;
+      }
+
+      // Bottom Row Percent Indicator
+      trHTML += `
+        <tr class="bg-slate-950/80">
+          <td class="w-[240px] py-3 px-4 border-r border-slate-900 text-left font-mono font-black text-[10px] text-slate-400 sticky left-0 bg-slate-950 z-20 uppercase tracking-widest">
+            System Efficiency
+          </td>
+      `;
+
+      timelineDates.forEach((date, dIdx) => {
+        const dateStr = getLocalDateString(date);
+        const isToday = dateStr === todayStr;
+
+        trHTML += `
+          <td 
+            id="efficiency_${dateStr}" 
+            class="w-[80px] text-center font-mono font-black text-xs border-r border-slate-900 ${isToday ? 'bg-emerald-950/10' : ''}"
+          >
+            <!-- Injected percentage dynamically -->
+          </td>
+        `;
+      });
+
+      trHTML += `</tr>`;
+      graphBody.innerHTML = trHTML;
+      updateEfficiencyMetrics();
+    }
+
+    // Dynamic Spline Calculations and Path Construction
+    function drawSplineChart() {
+      const points = [];
+      const cellWidth = 80;
+      const rowHeight = 28;
+      const paddingLeft = 240;
+
+      timelineDates.forEach((date, index) => {
+        const dateStr = getLocalDateString(date);
+        const score = getDailyScore(dateStr);
+        const x = paddingLeft + (index * cellWidth) + (cellWidth / 2);
+        const y = (9 - score) * rowHeight + (rowHeight / 2);
+        points.push({ x, y, score });
+      });
+
+      if (points.length === 0) {
+        svgContainer.innerHTML = '';
+        return;
+      }
+
+      // Create cubic bezier curve math strings
+      let pathD = `M ${points[0].x} ${points[0].y}`;
+      for (let i = 1; i < points.length; i++) {
+        const p0 = points[i - 1];
+        const p1 = points[i];
+        const cpX1 = p0.x + (p1.x - p0.x) / 3;
+        const cpY1 = p0.y;
+        const cpX2 = p0.x + 2 * (p1.x - p0.x) / 3;
+        const cpY2 = p1.y;
+        pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
+      }
+
+      // Generate dynamic SVG Nodes
+      let svgHTML = `
+        <svg class="w-full h-full pointer-events-none z-10 overflow-visible">
+          <!-- Glow Shadow -->
+          <path
+            d="${pathD}"
+            fill="none"
+            stroke="rgba(16, 185, 129, 0.12)"
+            stroke-width="10"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <!-- Core Line -->
+          <path
+            d="${pathD}"
+            fill="none"
+            stroke="#10B981"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="transition-all duration-300"
+          />
+      `;
+
+      // Plot actual indicators
+      points.forEach(pt => {
+        svgHTML += `
+          <g>
+            <circle
+              cx="${pt.x}"
+              cy="${pt.y}"
+              r="5"
+              fill="#10B981"
+              stroke="#020617"
+              stroke-width="2"
+              class="transition-transform hover:scale-150 duration-200"
+            />
+            ${pt.score > 0 ? `
+              <text
+                x="${pt.x}"
+                y="${pt.y - 12}"
+                text-anchor="middle"
+                font-size="9"
+                font-weight="900"
+                fill="#34D399"
+                style="user-select: none; font-family: monospace;"
+              >
+                ${pt.score}
+              </text>
+            ` : ''}
+          </g>
+        `;
+      });
+
+      svgHTML += `</svg>`;
+      svgContainer.innerHTML = svgHTML;
+    }
+
+    // Handles user typing values inside inputs
+    function handleCellUpdate(habitId, dateStr, textValue, inputEl) {
+      // Toggle auto-saving pulse state
+      saveIndicatorDot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping";
+      saveIndicatorText.innerText = "Saving...";
+
+      const previouslyPerfect = isDayPerfect(dateStr, trackerState);
+
+      // Mutate state instantly
+      trackerState[`${habitId}_${dateStr}`] = textValue;
+
+      // Sync safely to physical storage
+      localStorage.setItem('ht_gourav_state', JSON.stringify(trackerState));
+
+      // Handle custom style assignments for filled/empty elements
+      const container = document.getElementById(`cell_container_${habitId}_${dateStr}`);
+      const isFilled = textValue.trim().length > 0;
+      const isToday = dateStr === todayStr;
+
+      if (isFilled) {
+        container.className = `p-1.5 border-r border-b border-slate-900 bg-emerald-950/15 transition-all`;
+        inputEl.className = `cell-input w-full h-8 text-center text-xs font-bold rounded-md bg-transparent focus:outline-hidden transition-all text-emerald-300 border border-emerald-500/45 bg-emerald-500/5 shadow-inner shadow-emerald-500/10`;
+      } else {
+        container.className = `p-1.5 border-r border-b border-slate-900 transition-all ${
+          isToday ? 'bg-emerald-950/5' : 'bg-slate-950/10'
+        }`;
+        inputEl.className = `cell-input w-full h-8 text-center text-xs font-bold rounded-md bg-transparent focus:outline-hidden transition-all ${
+          isToday
+            ? 'text-slate-400 border border-emerald-500/25 focus:border-emerald-500/50'
+            : 'text-slate-500 border border-slate-800/60 focus:border-slate-700'
+        }`;
+      }
+
+      // Recalculate metrics
+      updateEfficiencyMetrics();
+      drawSplineChart();
+
+      // Check if day was newly perfected
+      const currentlyPerfect = isDayPerfect(dateStr, trackerState);
+      if (currentlyPerfect && !previouslyPerfect) {
+        triggerPerfectDayCelebration();
+      }
+
+      // Reset auto-save indicators with simple debounce
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveIndicatorDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+        saveIndicatorText.innerText = "System Synced";
+      }, 300);
+    }
+
+    // Refresh percentage metrics at bottom of matrix columns
+    function updateEfficiencyMetrics() {
+      timelineDates.forEach(date => {
+        const dateStr = getLocalDateString(date);
+        const score = getDailyScore(dateStr);
+        const percent = Math.round((score / 9) * 100);
+        const cell = document.getElementById(`efficiency_${dateStr}`);
+        
+        if (cell) {
+          cell.innerHTML = `
+            <div class="py-1 text-[10px] ${score === 9 ? 'text-emerald-400 font-extrabold' : 'text-slate-400'}">
+              ${percent}%
+            </div>
+          `;
+        }
+      });
+    }
+
+    // Triggers perfect performance modal notification
+    function triggerPerfectDayCelebration() {
+      perfectDayModal.classList.remove('hidden');
+      perfectDayModal.classList.add('flex');
+      setTimeout(() => {
+        perfectDayModal.classList.add('hidden');
+        perfectDayModal.classList.remove('flex');
+      }, 3000);
+    }
+
+    // Load elements on runtime start
+    window.onload = function() {
+      renderHeaders();
+      renderMatrixBody();
+      renderGraphGrid();
+      
+      // Paint vector graphs on window mount
+      drawSplineChart();
+    };
+
+    // Keep graph vector precise when scaling/rotating windows
+    window.addEventListener('resize', drawSplineChart);
+  </script>
+</body>
+</html>
