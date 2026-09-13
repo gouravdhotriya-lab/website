@@ -6,7 +6,7 @@
   <title>Secured Research Notes</title>
 
   <style>
-    /* Prevent text selection and highlighting across all browsers */
+    /* Prevent all text selection and highlighting */
     *, *::before, *::after {
       -webkit-user-select: none !important;
       -moz-user-select: none !important;
@@ -18,12 +18,12 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #0d1117;
       color: #c9d1d9;
     }
 
-    /* Blackout screen completely if someone attempts to print or save as PDF */
+    /* Blackout screen on print/PDF attempt */
     @media print {
       html, body {
         display: none !important;
@@ -74,9 +74,8 @@
       border-color: #58a6ff;
     }
 
-    .auth-card button {
-      width: 96%;
-      padding: 10px;
+    .btn {
+      padding: 10px 15px;
       background-color: #238636;
       border: none;
       border-radius: 6px;
@@ -86,7 +85,7 @@
       cursor: pointer;
     }
 
-    .auth-card button:hover {
+    .btn:hover {
       background-color: #2ea043;
     }
 
@@ -96,15 +95,73 @@
       min-height: 18px;
     }
 
-    /* Protected Notes Container (Hidden by Default) */
-    #content-container {
+    /* Main Container */
+    #main-wrapper {
       display: none;
       max-width: 850px;
-      margin: 50px auto;
-      padding: 30px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    /* Admin Control Panel */
+    #admin-panel {
+      display: none;
+      background: #1f242c;
+      border: 1px solid #388bfd;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    #admin-panel h3 {
+      margin-top: 0;
+      color: #58a6ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .admin-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .admin-controls select {
+      padding: 8px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      color: #fff;
+      border-radius: 6px;
+    }
+
+    .admin-controls label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    #generated-key-box {
+      margin-top: 15px;
+      padding: 12px;
+      background: #0d1117;
+      border: 1px dashed #238636;
+      border-radius: 6px;
+      display: none;
+      font-family: monospace;
+      color: #7ee787;
+    }
+
+    /* Content Area */
+    #content-container {
       background: #161b22;
       border: 1px solid #30363d;
       border-radius: 8px;
+      padding: 30px;
     }
 
     #content-container h1 {
@@ -121,37 +178,62 @@
 </head>
 <body>
 
-  <!-- Fullscreen Login Gatekeeper -->
+  <!-- Fullscreen Login Wall -->
   <div id="auth-overlay">
     <div class="auth-card">
       <h2>Restricted System</h2>
-      <input type="password" id="pass-field" placeholder="Enter Access Password" autocomplete="off">
-      <button id="submit-btn" onclick="verifySession()">Authorize</button>
+      <input type="password" id="pass-field" placeholder="Enter Access Code" autocomplete="off">
+      <button class="btn" id="submit-btn" style="width: 96%;" onclick="verifySession()">Authorize</button>
       <div id="status-msg"></div>
     </div>
   </div>
 
-  <!-- Protected Notes Section -->
-  <div id="content-container">
-    <h1>Restricted Research Notes</h1>
-    <hr>
-    <p>Replace this text with your actual notes, documents, or data. This entire container stays hidden until authorization passes.</p>
+  <div id="main-wrapper">
+    <!-- Admin-Only Panel for Temporary Passwords -->
+    <div id="admin-panel">
+      <h3>🛡️ Admin Key Generator</h3>
+      <p style="font-size: 13px; color: #8b949e; margin: 0;">Generate an expiring, one-time passcode for another user.</p>
+      
+      <div class="admin-controls">
+        <label>
+          Duration:
+          <select id="key-duration">
+            <option value="3600">1 Hour</option>
+            <option value="21600">6 Hours</option>
+            <option value="86400">24 Hours</option>
+          </select>
+        </label>
+
+        <label>
+          <input type="checkbox" id="key-single-use" checked> Single-Use (Destroys after 1 login)
+        </label>
+
+        <button class="btn" onclick="generateTempKey()">Create Key</button>
+      </div>
+
+      <div id="generated-key-box"></div>
+    </div>
+
+    <!-- Protected Notes Section -->
+    <div id="content-container">
+      <h1>Restricted Research Notes</h1>
+      <hr>
+      <p>Place your private notes, study materials, or documentation here.</p>
+    </div>
   </div>
 
   <script>
     // -------------------------------------------------------------
-    // CONFIGURATION: Replace with your actual Cloudflare Worker URL
-    // Example: https://gatekeeper.yourname.workers.dev
+    // CONFIGURATION
     // -------------------------------------------------------------
     const WORKER_URL = "https://notes-gatekeeper.gouravdhotriya.workers.dev";
+    let activeAdminSecret = "";
 
     // -------------------------------------------------------------
     // CLIENT DETERRENTS (Anti-Copy / Anti-Inspect)
     // -------------------------------------------------------------
-    // 1. Disable Right-Click
     document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-    // 2. Block inspection and copying shortcuts
     document.addEventListener("keydown", (e) => {
       const key = e.key.toLowerCase();
       // Block Ctrl+C, Ctrl+X, Ctrl+U, Ctrl+P, Ctrl+S, Ctrl+A
@@ -159,32 +241,28 @@
         e.preventDefault();
         return false;
       }
-      // Block F12 (Developer Tools)
+      // Block F12 Inspect
       if (e.key === "F12") {
         e.preventDefault();
         return false;
       }
     });
 
-    // 3. Prevent dragging text or elements
     document.addEventListener("dragstart", (e) => e.preventDefault());
-
-    // 4. Wipe clipboard if copy event triggers
     document.addEventListener("copy", (e) => e.preventDefault());
 
-    // 5. Allow pressing Enter on the password input field
     document.getElementById("pass-field").addEventListener("keypress", (e) => {
       if (e.key === "Enter") verifySession();
     });
 
     // -------------------------------------------------------------
-    // VERIFICATION & KICK ENGINE
+    // AUTHENTICATION
     // -------------------------------------------------------------
     async function verifySession() {
       const passInput = document.getElementById("pass-field");
       const status = document.getElementById("status-msg");
       const btn = document.getElementById("submit-btn");
-      const enteredPassword = passInput.value;
+      const enteredPassword = passInput.value.trim();
 
       if (!enteredPassword) {
         status.style.color = "#f85149";
@@ -194,7 +272,7 @@
 
       btn.disabled = true;
       status.style.color = "#8b949e";
-      status.innerText = "Verifying credentials & logging IP...";
+      status.innerText = "Verifying credentials & IP...";
 
       try {
         const response = await fetch(WORKER_URL, {
@@ -206,29 +284,70 @@
         const result = await response.json();
 
         if (response.ok && result.success) {
-          // Authentication Passed: Unlock content
+          // Authentication Success
           document.getElementById("auth-overlay").remove();
-          document.getElementById("content-container").style.display = "block";
+          document.getElementById("main-wrapper").style.display = "block";
+
+          // If Admin, reveal Admin Control Panel
+          if (result.isAdmin) {
+            activeAdminSecret = enteredPassword;
+            document.getElementById("admin-panel").style.display = "block";
+          }
         } else {
-          // Password mismatch or rejection: Kick immediately
           executeKickout();
         }
       } catch (err) {
-        // Any blocked connection or error: Kick immediately
         executeKickout();
       }
     }
 
+    // -------------------------------------------------------------
+    // ADMIN: GENERATE TEMPORARY KEY
+    // -------------------------------------------------------------
+    async function generateTempKey() {
+      const durationSeconds = document.getElementById("key-duration").value;
+      const singleUse = document.getElementById("key-single-use").checked;
+      const keyBox = document.getElementById("generated-key-box");
+
+      keyBox.style.display = "block";
+      keyBox.innerText = "Generating key in Cloudflare KV...";
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "create_temp_key",
+            adminPassword: activeAdminSecret,
+            durationSeconds: durationSeconds,
+            singleUse: singleUse
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          keyBox.innerHTML = `
+            <strong>Generated Key:</strong> <span style="font-size: 16px; color:#58a6ff;">${data.tempPassword}</span><br>
+            <strong>Lifespan:</strong> ${data.expiresInMinutes} Minutes<br>
+            <strong>Mode:</strong> ${data.singleUse ? "One-Time (Deletes after login)" : "Multi-Use until expired"}<br>
+            <small style="color:#8b949e;">Send this passcode to your visitor. It will not work once expired.</small>
+          `;
+        } else {
+          keyBox.innerText = "Failed to generate key.";
+        }
+      } catch (e) {
+        keyBox.innerText = "Network error while generating key.";
+      }
+    }
+
     function executeKickout() {
-      // 1. Wipe the entire web page immediately
       document.body.innerHTML = `
         <div style="background:#000; color:#ff3333; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:monospace;">
           <h1>ACCESS VIOLATION: IP RECORDED</h1>
-          <p>Mismatched credentials. Terminating session...</p>
+          <p>Invalid or Expired credentials. Terminating session...</p>
         </div>
       `;
 
-      // 2. Redirect away to Google after 1 second
       setTimeout(() => {
         window.location.replace("https://www.google.com");
       }, 1000);
