@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secured Notes</title>
+  <title>Secured Research Notes</title>
 
   <style>
-    /* Complete text-selection lockdown */
+    /* Prevent text selection and highlighting across all browsers */
     *, *::before, *::after {
       -webkit-user-select: none !important;
       -moz-user-select: none !important;
@@ -18,19 +18,19 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: #0d1117;
       color: #c9d1d9;
     }
 
-    /* Blackout screen on print/PDF export attempt */
+    /* Blackout screen completely if someone attempts to print or save as PDF */
     @media print {
       html, body {
         display: none !important;
       }
     }
 
-    /* Authentication Modal */
+    /* Lock Screen Overlay */
     #auth-overlay {
       position: fixed;
       inset: 0;
@@ -96,21 +96,32 @@
       min-height: 18px;
     }
 
-    /* Secured Content Area */
+    /* Protected Notes Container (Hidden by Default) */
     #content-container {
       display: none;
-      max-width: 800px;
+      max-width: 850px;
       margin: 50px auto;
-      padding: 20px;
+      padding: 30px;
       background: #161b22;
       border: 1px solid #30363d;
       border-radius: 8px;
+    }
+
+    #content-container h1 {
+      color: #f0f6fc;
+      margin-top: 0;
+    }
+
+    #content-container hr {
+      border: 0;
+      border-top: 1px solid #30363d;
+      margin: 20px 0;
     }
   </style>
 </head>
 <body>
 
-  <!-- Lock Screen Overlay -->
+  <!-- Fullscreen Login Gatekeeper -->
   <div id="auth-overlay">
     <div class="auth-card">
       <h2>Restricted System</h2>
@@ -120,26 +131,27 @@
     </div>
   </div>
 
-  <!-- Protected Notes (Hidden by Default) -->
+  <!-- Protected Notes Section -->
   <div id="content-container">
-    <h1>Private Notes</h1>
-    <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
-    <p>Your protected notes content goes here.</p>
+    <h1>Restricted Research Notes</h1>
+    <hr>
+    <p>Replace this text with your actual notes, documents, or data. This entire container stays hidden until authorization passes.</p>
   </div>
 
   <script>
     // -------------------------------------------------------------
-    // REPLACE THIS URL WITH YOUR DEPLOYED CLOUDFLARE WORKER LINK
+    // CONFIGURATION: Replace with your actual Cloudflare Worker URL
+    // Example: https://gatekeeper.yourname.workers.dev
     // -------------------------------------------------------------
-    const WORKER_URL = "https://gouravdhotriya-lab.github.io/website/";
+    const WORKER_URL = "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE";
 
     // -------------------------------------------------------------
     // CLIENT DETERRENTS (Anti-Copy / Anti-Inspect)
     // -------------------------------------------------------------
-    // Disable right click context menu
+    // 1. Disable Right-Click
     document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-    // Intercept common extraction keys
+    // 2. Block inspection and copying shortcuts
     document.addEventListener("keydown", (e) => {
       const key = e.key.toLowerCase();
       // Block Ctrl+C, Ctrl+X, Ctrl+U, Ctrl+P, Ctrl+S, Ctrl+A
@@ -147,23 +159,26 @@
         e.preventDefault();
         return false;
       }
-      // Block F12 Inspect Element
+      // Block F12 (Developer Tools)
       if (e.key === "F12") {
         e.preventDefault();
         return false;
       }
     });
 
-    // Strip copy events
+    // 3. Prevent dragging text or elements
+    document.addEventListener("dragstart", (e) => e.preventDefault());
+
+    // 4. Wipe clipboard if copy event triggers
     document.addEventListener("copy", (e) => e.preventDefault());
 
-    // Enter key triggers verification
+    // 5. Allow pressing Enter on the password input field
     document.getElementById("pass-field").addEventListener("keypress", (e) => {
       if (e.key === "Enter") verifySession();
     });
 
     // -------------------------------------------------------------
-    // AUTHENTICATION & KICK ENGINE
+    // VERIFICATION & KICK ENGINE
     // -------------------------------------------------------------
     async function verifySession() {
       const passInput = document.getElementById("pass-field");
@@ -179,7 +194,7 @@
 
       btn.disabled = true;
       status.style.color = "#8b949e";
-      status.innerText = "Verifying credentials & IP...";
+      status.innerText = "Verifying credentials & logging IP...";
 
       try {
         const response = await fetch(WORKER_URL, {
@@ -191,21 +206,21 @@
         const result = await response.json();
 
         if (response.ok && result.success) {
-          // Success: remove auth gate and reveal content
+          // Authentication Passed: Unlock content
           document.getElementById("auth-overlay").remove();
           document.getElementById("content-container").style.display = "block";
         } else {
-          // Password mismatch: execute kickout
+          // Password mismatch or rejection: Kick immediately
           executeKickout();
         }
       } catch (err) {
-        // Any request failure, blocked connection, or tampering triggers kickout
+        // Any blocked connection or error: Kick immediately
         executeKickout();
       }
     }
 
     function executeKickout() {
-      // 1. Wipe page content immediately
+      // 1. Wipe the entire web page immediately
       document.body.innerHTML = `
         <div style="background:#000; color:#ff3333; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:monospace;">
           <h1>ACCESS VIOLATION: IP RECORDED</h1>
@@ -213,7 +228,7 @@
         </div>
       `;
 
-      // 2. Redirect away after 1 second
+      // 2. Redirect away to Google after 1 second
       setTimeout(() => {
         window.location.replace("https://www.google.com");
       }, 1000);
