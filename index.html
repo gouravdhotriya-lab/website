@@ -1,1064 +1,222 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gourav's Habit Training Matrix</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Inter & JetBrains Mono -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
-  
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-          boxShadow: {
-            'glow-emerald': '0 0 25px rgba(16, 185, 129, 0.25)',
-            'glow-rose': '0 0 25px rgba(244, 63, 94, 0.25)',
-            'glow-indigo': '0 0 25px rgba(99, 102, 241, 0.25)',
-            'glow-amber': '0 0 25px rgba(245, 158, 11, 0.25)',
-          }
-        }
-      }
-    }
-  </script>
+  <title>Secured Notes</title>
 
   <style>
-    /* Custom premium scrollbar for smooth horizontal grid movement */
-    .scrollbar-matrix::-webkit-scrollbar {
-      height: 10px;
-      width: 10px;
-    }
-    .scrollbar-matrix::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.8);
-      border-radius: 9999px;
-    }
-    .scrollbar-matrix::-webkit-scrollbar-thumb {
-      background: rgba(16, 185, 129, 0.35);
-      border-radius: 9999px;
-      border: 2px solid rgba(15, 23, 42, 0.8);
-    }
-    .scrollbar-matrix::-webkit-scrollbar-thumb:hover {
-      background: rgba(16, 185, 129, 0.6);
+    /* Prevent all text selection and highlighting */
+    *, *::before, *::after {
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
     }
 
-    /* Premium Glassmorphism styling variables */
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #0d1117;
+      color: #c9d1d9;
     }
 
-    /* Print-to-PDF Specific Layout Overrides */
+    /* Blackout screen on print attempt */
     @media print {
-      body {
-        background: #ffffff !important;
-        color: #000000 !important;
-        font-family: 'Inter', sans-serif !important;
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-      
-      header, footer, button, .sets-trigger-btn, #toastContainer, #setsModal, #audioToggleBtn, .sync-panel-wrap, .no-print {
+      html, body {
         display: none !important;
       }
+    }
 
-      .glass-panel {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        backdrop-filter: none !important;
-        padding: 0 !important;
-      }
+    /* Lock Screen Overlay */
+    #auth-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: #0b0e14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999999;
+    }
 
-      h1, h2, h3, h4, span, p, td, th {
-        color: #000000 !important;
-      }
+    .auth-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      padding: 30px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
 
-      .overflow-x-auto {
-        overflow: visible !important;
-      }
+    .auth-card h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: #f0f6fc;
+    }
 
-      table {
-        width: 100% !important;
-        table-layout: fixed !important;
-        min-width: 100% !important;
-        border-collapse: collapse !important;
-      }
+    .auth-card input {
+      width: 90%;
+      padding: 10px;
+      margin: 15px 0;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #f0f6fc;
+      font-size: 14px;
+      outline: none;
+    }
 
-      /* Un-stick protocols on print to avoid overlapping columns on narrow views */
-      th.sticky, td.sticky {
-        position: static !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        border-right: 1px solid #cbd5e1 !important;
-      }
+    .auth-card input:focus {
+      border-color: #58a6ff;
+    }
 
-      td, th {
-        border: 1px solid #94a3b8 !important;
-        padding: 6px !important;
-        word-wrap: break-word !important;
-        white-space: normal !important;
-        color: #000000 !important;
-      }
+    .auth-card button {
+      width: 96%;
+      padding: 10px;
+      background-color: #238636;
+      border: none;
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
-      /* Hide interactive inputs during print, show the standard print spans */
-      .matrix-input, select, .sets-trigger-btn, input {
-        display: none !important;
-      }
+    .auth-card button:hover {
+      background-color: #2ea043;
+    }
 
-      .print-span {
-        display: block !important;
-        color: #000000 !important;
-        font-size: 11px !important;
-        font-weight: 700 !important;
-        text-align: center !important;
-        white-space: normal !important;
-      }
+    #status-msg {
+      margin-top: 15px;
+      font-size: 13px;
+      min-height: 18px;
+    }
 
-      .set-row-item {
-        border-bottom: 1px dashed #cbd5e1 !important;
-        padding: 2px 0 !important;
-        color: #000000 !important;
-      }
-      
-      .set-row-item:last-child {
-        border-bottom: none !important;
-      }
+    /* Content Area (Hidden by Default) */
+    #content-container {
+      display: none;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
     }
   </style>
 </head>
-<body class="min-h-screen bg-[#020617] text-slate-100 font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-300 flex flex-col justify-between">
+<body>
 
-  <!-- Confetti Celebration Canvas Overlay -->
-  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
-
-  <!-- Real-Time Alerts Notification Toast Container -->
-  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
-
-  <!-- MULTI-SET RECORDING MODAL -->
-  <div id="setsModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-    <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-emerald-500/40 shadow-glow-emerald">
-      <div class="flex justify-between items-start mb-4">
-        <div>
-          <h4 id="setsModalTitle" class="text-base font-black uppercase tracking-wider text-emerald-400">Log Multiple Sets</h4>
-          <p id="setsModalSubtitle" class="text-xs text-slate-400 mt-1">This will display each set stacked cleanly as its own row.</p>
-        </div>
-        <button id="closeSetsModalBtn" class="text-slate-400 hover:text-white transition-all text-sm font-mono bg-slate-900 w-8 h-8 rounded-full flex items-center justify-center border border-slate-800">✕</button>
-      </div>
-      
-      <!-- List of currently added sets -->
-      <div class="mb-5">
-        <span class="text-[10px] uppercase font-black tracking-widest text-slate-400 block mb-3">Currently Recorded Rows / Sets</span>
-        <div id="setsListContainer" class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1 scrollbar-matrix">
-          <!-- Dynamically populated set badges with delete options -->
-        </div>
-        <p id="noSetsFallbackText" class="text-xs text-slate-500 italic py-3 hidden">No separate sets logged yet. Enter one below.</p>
-      </div>
-      
-      <!-- Input to add a new set/record -->
-      <div class="grid grid-cols-3 gap-3 mb-6">
-        <div class="col-span-2">
-          <input id="newSetInput" type="text" placeholder="Value (e.g. 10 or 30s)" class="w-full bg-slate-950 text-emerald-400 font-mono text-sm font-bold border border-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500" />
-        </div>
-        <button id="addSetBtn" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-sm uppercase rounded-xl transition-all">
-          + Add Set
-        </button>
-      </div>
-      
-      <!-- Summary and Save -->
-      <div class="border-t border-slate-900 pt-5 flex items-center justify-between">
-        <div class="font-mono text-xs text-slate-400">
-          Result Preview: <span id="setsTotalValue" class="text-emerald-400 font-bold block mt-1 text-sm">-</span>
-        </div>
-        <button id="saveSetsBtn" class="px-5 py-3 bg-slate-900 border border-emerald-500/30 hover:border-emerald-500 text-xs font-bold text-emerald-400 rounded-xl transition-all shadow-lg uppercase tracking-wider">
-          Save Rows
-        </button>
-      </div>
+  <!-- Fullscreen Login Wall -->
+  <div id="auth-overlay">
+    <div class="auth-card">
+      <h2>Restricted System</h2>
+      <input type="password" id="pass-field" placeholder="Enter Access Password" autocomplete="off">
+      <button id="submit-btn" onclick="verifySession()">Authorize</button>
+      <div id="status-msg"></div>
     </div>
   </div>
 
-  <div>
-    <!-- SYSTEM HEADER -->
-    <header class="border-b border-slate-900 bg-slate-950/90 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 py-4">
-      <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
-        
-        <!-- Brand Block -->
-        <div class="flex items-center gap-3.5 self-start lg:self-center">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-500 to-indigo-500 p-[1px] shadow-glow-emerald">
-            <div class="w-full h-full rounded-[11px] bg-slate-950 flex items-center justify-center text-2xl text-emerald-400">
-              ⚡
-            </div>
-          </div>
-          <div>
-            <h1 class="text-lg sm:text-xl font-black tracking-wider text-white uppercase leading-none">
-              Gourav's Habit Training Matrix
-            </h1>
-            <p class="text-xs text-emerald-400 font-mono mt-1 flex items-center gap-1.5">
-              <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              Cohort Mode: Strict 14-Day Cycle
-            </p>
-          </div>
-        </div>
-
-        <!-- Live Real-Time Multi-Device Sync Panel & Controls -->
-        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-between lg:justify-end sync-panel-wrap">
-          
-          <div class="flex items-center gap-2.5 bg-slate-900/60 border border-slate-800 rounded-xl p-2.5 w-full sm:w-auto">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-mono text-slate-400 uppercase tracking-wider font-extrabold whitespace-nowrap">☁️ Sync Code:</span>
-              <input id="syncCodeInput" type="text" placeholder="Enter custom sync key" class="bg-slate-950 text-emerald-400 font-mono text-xs font-bold border border-slate-800 focus:border-emerald-500/50 focus:shadow-glow-emerald rounded-lg px-3 py-1.5 focus:outline-none w-48 sm:w-56 text-center transition-all" />
-            </div>
-            <div class="flex items-center gap-1.5 border-l border-slate-800 pl-3">
-              <div id="saveIndicatorDot" class="w-2.5 h-2.5 rounded-full bg-slate-600 transition-all"></div>
-              <span id="saveIndicatorText" class="text-[10px] font-mono uppercase tracking-widest font-black text-slate-500 whitespace-nowrap">
-                Local Only
-              </span>
-            </div>
-          </div>
-
-          <!-- Quick Audio and Print/PDF utilities -->
-          <div class="flex items-center gap-2">
-            <button id="audioToggleBtn" class="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-emerald-400 transition-all shadow-md text-sm" title="Toggle sound synthesizer feedback">
-              🔊
-            </button>
-            <button id="exportPdfBtn" class="px-4 py-3 rounded-xl bg-emerald-950/40 border border-emerald-900/60 hover:bg-emerald-900/40 hover:border-emerald-500 text-xs font-bold text-emerald-400 transition-all flex items-center gap-2 shadow-lg uppercase tracking-wider">
-              📄 Export PDF / Print
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </header>
-
-    <!-- CORE WORKSPACE -->
-    <main class="max-w-7xl mx-auto p-4 sm:p-6 w-full flex flex-col gap-6">
-
-      <!-- TRAINEE IDENTIFICATION CARD -->
-      <div class="glass-panel rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-600 to-indigo-600 flex items-center justify-center font-black text-xl text-white shadow-lg">
-            GR
-          </div>
-          <div>
-            <div class="text-[10px] uppercase font-black tracking-widest text-emerald-400 font-mono font-bold">Trainee Athlete</div>
-            <h2 class="text-xl font-black text-white tracking-tight">Gourav Rathod</h2>
-            <p class="text-xs text-slate-400 mt-1">Focusing strictly on performance optimization and system training.</p>
-          </div>
-        </div>
-        
-        <div class="flex gap-8 sm:gap-10 border-t border-slate-800/80 pt-4 sm:pt-0 sm:border-t-0 font-mono text-sm">
-          <div>
-            <span class="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-1 font-bold">Start Date</span>
-            <span class="font-bold text-emerald-400 text-base">22-05-2026</span>
-          </div>
-          <div class="border-l border-slate-800 pl-6">
-            <span class="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-1 font-bold">Total Cohort</span>
-            <span class="font-bold text-slate-300 text-base">14 Days Elite</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- DIRECT 14-DAY PERFORMANCE MATRIX -->
-      <section class="glass-panel rounded-2xl p-5 overflow-hidden shadow-2xl">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-          <div>
-            <h3 class="text-sm uppercase font-black tracking-widest text-slate-300">14-Day Performance Grid</h3>
-            <p class="text-xs text-slate-400 mt-1">Day 1 is May 22, 2026. Click the <span class="text-emerald-400 font-bold font-mono">＋</span> button to add sets cleanly stacked on new rows.</p>
-          </div>
-          <div class="text-[10px] font-mono text-slate-400 flex items-center gap-1 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 self-start sm:self-auto">
-            Swipe Horizontal ↔️
-          </div>
-        </div>
-
-        <!-- Scrollable Grid Container -->
-        <div class="overflow-x-auto rounded-xl border border-slate-900 scrollbar-matrix">
-          <!-- We set an ultra-spacious width of 2500px to allow massive columns without text overlaps -->
-          <table class="w-full border-collapse table-fixed min-w-[2500px]">
-            <thead id="tableHeader">
-              <!-- Dynamically populated dates in JS -->
-            </thead>
-            <tbody id="tableBody">
-              <!-- Dynamically populated rows and values in JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- PERFORMANCE SPLINE CHART -->
-      <section class="glass-panel rounded-2xl p-6 border border-emerald-500/10 shadow-glow-emerald/5 no-print">
-        <div class="flex justify-between items-center border-b border-slate-900 pb-3 mb-4">
-          <div class="flex items-center gap-2.5">
-            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-lg text-emerald-400">📈</div>
-            <div>
-              <h3 class="text-xs uppercase font-black tracking-widest text-white leading-none">Daily Performance Trend</h3>
-              <p class="text-xs text-slate-500 mt-1.5">Efficiency percentage (0-100%) plotted across the strict 14-day tracking window</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="relative w-full h-[240px] bg-slate-950/40 rounded-xl border border-slate-900/60 overflow-hidden">
-          <div id="svgContainer" class="absolute inset-0 w-full h-full pointer-events-none"></div>
-          <!-- Chart Gridbackdrop lines -->
-          <div class="absolute inset-0 flex flex-col justify-between p-4 pointer-events-none opacity-20">
-            <div class="border-b border-dashed border-slate-800 w-full h-px text-[9px] text-emerald-400 font-mono">100% (Complete Perfect Day)</div>
-            <div class="border-b border-dashed border-slate-800 w-full h-px text-[9px] text-slate-400 font-mono">70% (Baseline Met)</div>
-            <div class="border-b border-dashed border-slate-800 w-full h-px text-[9px] text-slate-400 font-mono">50% (Average Progress)</div>
-            <div class="border-b border-dashed border-slate-800 w-full h-px text-[9px] text-slate-400 font-mono">20% (Low Activity)</div>
-            <div class="w-full h-px text-[9px] text-slate-400 font-mono">0% (No Records Entered)</div>
-          </div>
-        </div>
-      </section>
-
-    </main>
+  <!-- Your Protected Notes -->
+  <div id="content-container">
+    <h1>Restricted Research Notes</h1>
+    <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
+    <p>Place your private notes and data here. This section is completely hidden until authorized.</p>
   </div>
 
-  <!-- SYSTEM FOOTER -->
-  <footer class="w-full py-6 border-t border-slate-900 mt-12 bg-slate-950 text-center no-print">
-    <p class="text-[10px] uppercase font-mono tracking-widest text-slate-500">
-      Gourav Rathod Elite Protocol Matrix • Day 1 Commenced on 22-05-2026
-    </p>
-  </footer>
+  <script>
+    // -------------------------------------------------------------
+    // CONFIGURATION
+    // -------------------------------------------------------------
+    const WORKER_URL = "https://your-worker-name.your-subdomain.workers.dev";
 
-  <!-- Real-Time Database Firebase CDN Imports -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, off } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+    // -------------------------------------------------------------
+    // CLIENT DETERRENTS (Anti-Copy / Anti-Inspect)
+    // -------------------------------------------------------------
+    // Disable right-click context menu
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-    const COHORT_DAYS = 14;
-    const START_DATE = new Date(2026, 4, 22); // May 22, 2026
+    // Block keyboard shortcuts
+    document.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+      // Block Ctrl+C, Ctrl+X, Ctrl+U, Ctrl+P, Ctrl+S, Ctrl+A
+      if (e.ctrlKey && ["c", "x", "u", "p", "s", "a"].includes(key)) {
+        e.preventDefault();
+        return false;
+      }
+      // Block F12 Inspect Element
+      if (e.key === "F12") {
+        e.preventDefault();
+        return false;
+      }
+    });
 
-    const TRAINED_HABITS = [
-      { id: "four_am_puja", name: "1. 4 AM Puja 🌅", placeholder: "Time/Yes", type: "text" },
-      { id: "naam_jap", name: "2. Naam Jap 🙏", placeholder: "Minutes/Reps", type: "text" },
-      { id: "hindi_reading", name: "3. Hindi Reading 📚", placeholder: "Pages/Notes", type: "text" },
-      { id: "new_idea", name: "4. New Idea 💡", placeholder: "Idea Name & Test", type: "text" },
-      { id: "exercise", name: "5. Exercise (Normal Workout) 🏋️", placeholder: "Reps/Duration", type: "text" },
-      { id: "push_ups", name: "6. Push-Ups 🦾", placeholder: "Reps count", type: "text" },
-      { id: "squats", name: "7. Squats 🦵", placeholder: "Reps count", type: "text" },
-      { id: "wall_sit", name: "8. Wall Sit 🧱", placeholder: "Hold duration", type: "text" },
-      { id: "plank", name: "9. Plank ⏱️", placeholder: "Hold duration", type: "text" },
-      { id: "no_junk_food", name: "10. No Junk Food 🥗", placeholder: "Clean/Junk", type: "select", options: ["", "Clean ✅", "Junk ❌"] }
-    ];
+    // Clear clipboard if copy triggered
+    document.addEventListener("copy", (e) => e.preventDefault());
 
-    // Gourav's EXACT day-by-day logs for Day 1 (May 22) and Day 2 (May 23) pre-filled
-    const baselineGouravData = {
-      // Day 1: May 22
-      "four_am_puja_2026-05-22": "just woke up",
-      "naam_jap_2026-05-22": "101",
-      "hindi_reading_2026-05-22": "arti",
-      "new_idea_2026-05-22": "website",
-      "exercise_2026-05-22": "yes",
-      "push_ups_2026-05-22": "10",
-      "squats_2026-05-22": "61",
-      "wall_sit_2026-05-22": "30s",
-      "plank_2026-05-22": "30s",
-      "no_junk_food_2026-05-22": "",
+    // Enter key listener on input field
+    document.getElementById("pass-field").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") verifySession();
+    });
 
-      // Day 2: May 23
-      "four_am_puja_2026-05-23": "",
-      "naam_jap_2026-05-23": "",
-      "hindi_reading_2026-05-23": "",
-      "new_idea_2026-05-23": "",
-      "exercise_2026-05-23": "yes",
-      "push_ups_2026-05-23": "10",
-      "squats_2026-05-23": "67",
-      "wall_sit_2026-05-23": "1m 11s",
-      "plank_2026-05-23": "53s",
-      "no_junk_food_2026-05-23": "Junk ❌"
-    };
+    // -------------------------------------------------------------
+    // AUTHENTICATION & KICK ENGINE
+    // -------------------------------------------------------------
+    async function verifySession() {
+      const passInput = document.getElementById("pass-field");
+      const status = document.getElementById("status-msg");
+      const btn = document.getElementById("submit-btn");
+      const enteredPassword = passInput.value;
 
-    // Tracker state registry
-    let trackerState = {};
-
-    // Generate strict date formats
-    const getLocalDateStr = (date) => {
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, '0');
-      const dd = String(date.getDate()).padStart(2, '0');
-      return `${yyyy}-${mm}-${dd}`;
-    };
-
-    let timelineDates = [];
-    for (let i = 0; i < COHORT_DAYS; i++) {
-      const d = new Date(START_DATE);
-      d.setDate(START_DATE.getDate() + i);
-      timelineDates.push(d);
-    }
-
-    // Initialize state with combined localStorage and original baseline records
-    function initializeTrackerData() {
-      const savedMemory = localStorage.getItem('gr_matrix_v5_state');
-      if (savedMemory) {
-        try {
-          trackerState = JSON.parse(savedMemory);
-        } catch (e) {
-          trackerState = {};
-        }
+      if (!enteredPassword) {
+        status.style.color = "#f85149";
+        status.innerText = "Password cannot be empty.";
+        return;
       }
 
-      // Check and apply baseline May 22 & May 23 records if not set
-      Object.keys(baselineGouravData).forEach(key => {
-        if (trackerState[key] === undefined) {
-          trackerState[key] = baselineGouravData[key];
-        }
-      });
+      btn.disabled = true;
+      status.style.color = "#8b949e";
+      status.innerText = "Verifying credentials & IP...";
 
-      localStorage.setItem('gr_matrix_v5_state', JSON.stringify(trackerState));
-    }
-
-    initializeTrackerData();
-
-    const getCellValue = (habitId, dateStr) => trackerState[`${habitId}_${dateStr}`] || "";
-
-    const getDailyScore = (dateStr) => {
-      let score = 0;
-      TRAINED_HABITS.forEach(habit => {
-        const value = getCellValue(habit.id, dateStr).trim();
-        if (value.length > 0) {
-          score++;
-        }
-      });
-      return score;
-    };
-
-    // Dynamic sound synthesizer panel (Web Audio API)
-    let audioCtx = null;
-    let audioEnabled = localStorage.getItem('gr_sound_v5_active') !== 'false';
-
-    function playBeep(frequency, type, duration, volume) {
-      if (!audioEnabled) return;
       try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        const osc = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        osc.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-
-        osc.frequency.value = frequency;
-        osc.type = type || 'sine';
-        gainNode.gain.setValueAtTime(volume || 0.1, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {
-        console.warn('Audio feedback context blocked or not active.', e);
-      }
-    }
-
-    function playSuccessTone() {
-      playBeep(523.25, 'sine', 0.12, 0.1); // C5
-      setTimeout(() => playBeep(659.25, 'sine', 0.18, 0.08), 80); // E5
-    }
-
-    function playAlertTone() {
-      playBeep(293.66, 'sawtooth', 0.2, 0.15); // D4
-      setTimeout(() => playBeep(220.00, 'sawtooth', 0.3, 0.15), 110); // A3
-    }
-
-    // High performance custom Canvas Confetti system
-    const confCanvas = document.getElementById('confettiCanvas');
-    const confCtx = confCanvas.getContext('2d');
-    let confActive = false;
-    let confParticles = [];
-
-    function resizeConfetti() {
-      confCanvas.width = window.innerWidth;
-      confCanvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeConfetti);
-    resizeConfetti();
-
-    function triggerPerfectDayCelebration() {
-      confActive = true;
-      confParticles = [];
-      const colors = ['#10B981', '#34D399', '#3B82F6', '#6366F1', '#F59E0B', '#EF4444'];
-      for (let i = 0; i < 90; i++) {
-        confParticles.push({
-          x: Math.random() * confCanvas.width,
-          y: Math.random() * confCanvas.height - confCanvas.height,
-          size: Math.random() * 5 + 4,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          speedX: Math.random() * 4 - 2,
-          speedY: Math.random() * 3 + 4,
-          rotation: Math.random() * 360,
-          rotationSpeed: Math.random() * 3 - 1.5
+        const response = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: enteredPassword })
         });
-      }
-      runConfettiLoop();
-      setTimeout(() => { confActive = false; }, 3000);
-    }
 
-    function runConfettiLoop() {
-      if (confParticles.length === 0 && !confActive) return;
-      confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
-      for (let i = 0; i < confParticles.length; i++) {
-        const p = confParticles[i];
-        p.y += p.speedY;
-        p.x += p.speedX;
-        p.rotation += p.rotationSpeed;
+        const result = await response.json();
 
-        confCtx.save();
-        confCtx.translate(p.x, p.y);
-        confCtx.rotate((p.rotation * Math.PI) / 180);
-        confCtx.fillStyle = p.color;
-        confCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-        confCtx.restore();
-
-        if (p.y > confCanvas.height) {
-          if (confActive) {
-            p.y = -20;
-            p.x = Math.random() * confCanvas.width;
-          } else {
-            confParticles.splice(i, 1);
-            i--;
-          }
-        }
-      }
-      if (confParticles.length > 0) {
-        requestAnimationFrame(runConfettiLoop);
-      }
-    }
-
-    // Decentralized Cross-Device Sync Setup
-    let syncCode = localStorage.getItem('gr_matrix_v5_synccode') || "";
-    let firebaseActive = false;
-    let rtdbInstance = null;
-    let syncListenerRef = null;
-
-    // Use default public open real-time database configured for cross-device sync
-    const firebaseConfig = {
-      databaseURL: "https://habit-tracker-sync-default-rtdb.firebaseio.com/"
-    };
-
-    try {
-      const app = initializeApp(firebaseConfig);
-      rtdbInstance = getDatabase(app);
-      firebaseActive = true;
-    } catch (e) {
-      console.warn("Could not connect directly to the shared Realtime Database. Offline fallback applied.", e);
-    }
-
-    function updateSyncIndicator(status, message = "") {
-      const dot = document.getElementById('saveIndicatorDot');
-      const text = document.getElementById('saveIndicatorText');
-      if (!dot || !text) return;
-
-      switch (status) {
-        case 'saving':
-          dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping shadow-glow-amber";
-          text.className = "text-[10px] font-mono uppercase tracking-widest font-black text-amber-500";
-          text.innerText = "Syncing...";
-          break;
-        case 'active':
-          dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-glow-emerald";
-          text.className = "text-[10px] font-mono uppercase tracking-widest font-black text-emerald-400";
-          text.innerText = message ? `Live: ${message}` : "Synced";
-          break;
-        case 'error':
-          dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 shadow-glow-rose animate-pulse";
-          text.className = "text-[10px] font-mono uppercase tracking-widest font-black text-rose-500";
-          text.innerText = "Error Syncing";
-          break;
-        case 'local':
-        default:
-          dot.className = "w-2.5 h-2.5 rounded-full bg-slate-600";
-          text.className = "text-[10px] font-mono uppercase tracking-widest font-black text-slate-500";
-          text.innerText = "Local Only";
-          break;
-      }
-    }
-
-    // Connect real-time change subscriber across phone and desktop
-    function initiateDeviceSync() {
-      const codeInput = document.getElementById('syncCodeInput');
-      const code = (codeInput.value || "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
-      
-      // Stop any existing subscriber
-      if (syncListenerRef && firebaseActive) {
-        off(syncListenerRef);
-        syncListenerRef = null;
-      }
-
-      if (!code) {
-        syncCode = "";
-        localStorage.removeItem('gr_matrix_v5_synccode');
-        updateSyncIndicator('local');
-        return;
-      }
-
-      syncCode = code;
-      localStorage.setItem('gr_matrix_v5_synccode', code);
-
-      if (!firebaseActive) {
-        updateSyncIndicator('error');
-        return;
-      }
-
-      updateSyncIndicator('saving');
-      
-      syncListenerRef = ref(rtdbInstance, `matrices/${code}`);
-
-      // Listen dynamically for updates on phone or desktop
-      onValue(syncListenerRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const incomingState = snapshot.val() || {};
-          mergeIncomingSyncState(incomingState);
+        if (response.ok && result.success) {
+          // Authentication Passed: Wipe login box and show notes
+          document.getElementById("auth-overlay").remove();
+          document.getElementById("content-container").style.display = "block";
         } else {
-          // If the cloud space is empty, populate it with current baseline state
-          set(syncListenerRef, trackerState);
+          // Trigger Immediate Kickout
+          executeKickout();
         }
-        updateSyncIndicator('active', code);
-      }, (error) => {
-        console.error("Database connection refused", error);
-        updateSyncIndicator('error');
-      });
-    }
-
-    // Smooth state merge that avoids overriding currently active typing fields
-    function mergeIncomingSyncState(incoming) {
-      let isMutated = false;
-      const activeElement = document.activeElement;
-      const focusedHabit = activeElement ? activeElement.getAttribute('data-habit') : null;
-      const focusedDate = activeElement ? activeElement.getAttribute('data-date') : null;
-
-      Object.keys(incoming).forEach(key => {
-        // Skip updating the currently focused input cell
-        if (focusedHabit && focusedDate && key === `${focusedHabit}_${focusedDate}`) {
-          return;
-        }
-
-        if (trackerState[key] !== incoming[key]) {
-          trackerState[key] = incoming[key];
-          isMutated = true;
-        }
-      });
-
-      if (isMutated) {
-        localStorage.setItem('gr_matrix_v5_state', JSON.stringify(trackerState));
-        renderMatrixSpreadsheet();
-      }
-    }
-
-    // Push local state changes instantly to the paired cloud DB
-    function pushLocalChangesToCloud() {
-      if (!syncCode || !firebaseActive) return;
-      try {
-        const syncRef = ref(rtdbInstance, `matrices/${syncCode}`);
-        set(syncRef, trackerState);
       } catch (err) {
-        console.error("Sync writing failed", err);
-        updateSyncIndicator('error');
+        // Any request failure, blocked connection, or tampering triggers a kick
+        executeKickout();
       }
     }
 
-    // Multi-Set Record Logger Popover Controls
-    let activeSetsHabitId = "";
-    let activeSetsDateStr = "";
-    let currentSetsList = [];
-
-    const setsModal = document.getElementById('setsModal');
-    const newSetInput = document.getElementById('newSetInput');
-    const setsListContainer = document.getElementById('setsListContainer');
-    const setsTotalValue = document.getElementById('setsTotalValue');
-    const noSetsFallbackText = document.getElementById('noSetsFallbackText');
-
-    function openSetsRecordModal(habitId, dateStr, habitName) {
-      activeSetsHabitId = habitId;
-      activeSetsDateStr = dateStr;
-
-      document.getElementById('setsModalTitle').innerText = `Log sets: ${habitName}`;
-      
-      const formattedDate = new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
-      document.getElementById('setsModalSubtitle').innerText = `Record progressive sets for Day on ${formattedDate}`;
-
-      // Fetch currently stored text values to parse existing sets
-      const currentVal = getCellValue(habitId, dateStr);
-      currentSetsList = [];
-      
-      if (currentVal.trim().length > 0) {
-        // Split on comma to load previously logged sets
-        currentSetsList = currentVal.split(',').map(s => s.trim()).filter(s => s.length > 0);
-      }
-
-      newSetInput.value = "";
-      renderSetsModalList();
-      setsModal.classList.remove('hidden');
-      newSetInput.focus();
-    }
-
-    function renderSetsModalList() {
-      setsListContainer.innerHTML = "";
-      if (currentSetsList.length === 0) {
-        noSetsFallbackText.classList.remove('hidden');
-        setsTotalValue.innerText = "No sets recorded";
-      } else {
-        noSetsFallbackText.classList.add('hidden');
-        
-        currentSetsList.forEach((setVal, index) => {
-          const badge = document.createElement('div');
-          badge.className = "flex items-center justify-between bg-slate-900 border border-slate-800 text-emerald-300 font-mono text-xs font-bold px-4 py-2.5 rounded-xl shadow-inner";
-          badge.innerHTML = `
-            <span>Set ${index + 1}: <strong class="text-white ml-1">${setVal}</strong></span>
-            <button class="text-rose-400 hover:text-rose-200 transition-colors font-black ml-2 px-1 text-xs" data-set-index="${index}">✕</button>
-          `;
-          setsListContainer.appendChild(badge);
-        });
-
-        // Calculate visual mathematical preview summary
-        const numberParts = currentSetsList.map(s => parseFloat(s)).filter(n => !isNaN(n));
-        const hasNumbers = numberParts.length > 0;
-        
-        if (hasNumbers && numberParts.length === currentSetsList.length) {
-          const sum = numberParts.reduce((a, b) => a + b, 0);
-          setsTotalValue.innerText = `${sum} Total (${currentSetsList.length} Sets)`;
-        } else {
-          setsTotalValue.innerText = currentSetsList.join(', ');
-        }
-      }
-
-      // Add delete buttons events
-      setsListContainer.querySelectorAll('[data-set-index]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const index = parseInt(btn.getAttribute('data-set-index'));
-          currentSetsList.splice(index, 1);
-          renderSetsModalList();
-        });
-      });
-    }
-
-    document.getElementById('addSetBtn').addEventListener('click', () => {
-      const val = newSetInput.value.trim();
-      if (!val) return;
-      currentSetsList.push(val);
-      newSetInput.value = "";
-      renderSetsModalList();
-      newSetInput.focus();
-    });
-
-    // Support trigger on 'Enter' key inside set input
-    newSetInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const val = newSetInput.value.trim();
-        if (!val) return;
-        currentSetsList.push(val);
-        newSetInput.value = "";
-        renderSetsModalList();
-      }
-    });
-
-    document.getElementById('saveSetsBtn').addEventListener('click', () => {
-      const finalVal = currentSetsList.join(', ');
-      updateMatrixMetricCell(activeSetsHabitId, activeSetsDateStr, finalVal);
-      setsModal.classList.add('hidden');
-    });
-
-    document.getElementById('closeSetsModalBtn').addEventListener('click', () => {
-      setsModal.classList.add('hidden');
-    });
-
-    // Dynamic table structures generator
-    function renderMatrixSpreadsheet() {
-      const tableHeader = document.getElementById('tableHeader');
-      const tableBody = document.getElementById('tableBody');
-
-      // 1. Column Headers mapping
-      let headerHTML = `
-        <tr class="bg-slate-950/90 text-xs font-bold">
-          <th class="w-[260px] py-4 px-4 text-left uppercase text-slate-400 sticky left-0 bg-[#020617] z-30 border-r border-b border-slate-900 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">Protocols</th>
-      `;
-      timelineDates.forEach((date, idx) => {
-        headerHTML += `
-          <th class="w-[160px] py-3 text-center border-r border-b border-slate-900/60 bg-slate-950/50">
-            <div class="font-mono text-[10px] opacity-60">Day ${idx + 1}</div>
-            <div class="text-sm font-black mt-0.5">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-            <div class="text-[10px] font-mono tracking-wider opacity-50">${date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-          </th>`;
-      });
-      tableHeader.innerHTML = headerHTML + `</tr>`;
-
-      // 2. Value rows mapping
-      let bodyHTML = '';
-      TRAINED_HABITS.forEach((habit, habitIdx) => {
-        bodyHTML += `
-          <tr class="hover:bg-slate-900/10 transition-colors">
-            <td class="w-[260px] py-4 px-4 border-r border-b border-slate-900 sticky left-0 bg-[#020617] z-20 font-black text-sm text-slate-200 flex items-center justify-between shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
-              <span class="truncate" title="${habit.name}">${habit.name}</span>
-            </td>
-        `;
-
-        timelineDates.forEach((date) => {
-          const dateStr = getLocalDateStr(date);
-          const val = getCellValue(habit.id, dateStr);
-          const isFilled = val.trim().length > 0;
-
-          let cellBg = isFilled ? 'bg-emerald-950/10' : 'bg-transparent';
-          let inputHTML = '';
-
-          // Display different layout elements based on input type options
-          if (habit.type === 'select') {
-            const selectTheme = val.includes('Clean') ? 'text-emerald-400 bg-emerald-950/30' : val.includes('Junk') ? 'text-rose-400 bg-rose-950/30' : 'text-slate-500';
-            
-            // For printing: render a text representation of selected options
-            inputHTML = `
-              <select class="matrix-input w-full bg-slate-950/40 text-center border border-slate-800 focus:border-emerald-500/50 rounded px-1.5 py-1.5 text-xs font-bold font-mono focus:outline-none ${selectTheme}" data-habit="${habit.id}" data-date="${dateStr}">
-                ${habit.options.map(opt => `<option value="${opt}" ${val === opt ? 'selected' : ''} class="bg-[#020617] text-white">${opt || '-'}</option>`).join('')}
-              </select>
-              <span class="print-span hidden">${val || '-'}</span>
-            `;
-          } else {
-            // Stack sets cleanly in block rows if comma-separated values are found!
-            let setsRowsHTML = '';
-            let rawSetItems = val.split(',').map(s => s.trim()).filter(s => s.length > 0);
-            
-            if (rawSetItems.length > 1) {
-              // Stacked rows presentation for multiple logged sets
-              setsRowsHTML = `
-                <div class="w-full flex flex-col gap-1 mb-2 text-left font-mono text-[11px]">
-                  ${rawSetItems.map((item, i) => `
-                    <div class="set-row-item flex justify-between items-center bg-emerald-950/20 text-emerald-300 px-2 py-1 rounded-md border border-emerald-500/10">
-                      <span>Set ${i+1}:</span>
-                      <strong class="text-white">${item}</strong>
-                    </div>
-                  `).join('')}
-                </div>
-              `;
-            }
-
-            // High contrast layout: stacks inputs above logged visual sets beautifully!
-            inputHTML = `
-              <div class="flex flex-col w-full gap-1.5 p-1.5 bg-slate-950/40 border border-slate-800 focus-within:border-emerald-500/50 rounded-lg transition-all">
-                ${setsRowsHTML}
-                <div class="flex items-center gap-1">
-                  <input type="text" value="${val}" placeholder="${habit.placeholder}" class="matrix-input w-full bg-transparent border-0 text-center text-xs font-mono font-bold text-slate-100 placeholder:text-slate-800 placeholder:text-[10px] focus:outline-none py-1.5" data-habit="${habit.id}" data-date="${dateStr}" />
-                  <button class="sets-trigger-btn flex-shrink-0 w-6 h-6 rounded-md bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 text-xs font-black flex items-center justify-center transition-all" data-habit="${habit.id}" data-date="${dateStr}" data-habit-name="${habit.name}" title="Record Multiple Sets">＋</button>
-                </div>
-              </div>
-              
-              <!-- Printable mirror text list (renders perfectly as plain text during print commands) -->
-              <div class="print-span hidden text-left font-mono text-xs text-black">
-                ${rawSetItems.length > 1 
-                  ? rawSetItems.map((item, i) => `<div class="set-row-item">Set ${i+1}: ${item}</div>`).join('') 
-                  : `<div>${val || '-'}</div>`}
-              </div>
-            `;
-          }
-
-          bodyHTML += `
-            <td class="p-1.5 border-r border-b border-slate-900/50 text-center transition-all ${cellBg}">
-              ${inputHTML}
-            </td>
-          `;
-        });
-        bodyHTML += `</tr>`;
-      });
-
-      // 3. Bottom Execution Level Metrics Line mapping
-      bodyHTML += `
-        <tr class="bg-slate-950/80">
-          <td class="w-[260px] py-4 px-4 sticky left-0 bg-[#020617] z-20 font-black text-xs uppercase font-mono tracking-wider text-slate-400 border-r border-b border-slate-900 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
-            Efficiency Level
-          </td>
-      `;
-      timelineDates.forEach((date) => {
-        const dateStr = getLocalDateStr(date);
-        const score = getDailyScore(dateStr);
-        const percentage = Math.round((score / TRAINED_HABITS.length) * 100);
-        let colorTheme = percentage === 100 ? 'text-emerald-400 font-black' : percentage >= 70 ? 'text-teal-400 font-bold' : percentage > 0 ? 'text-amber-400' : 'text-slate-600';
-        bodyHTML += `
-          <td class="py-3 text-center font-mono font-black text-sm border-r border-b border-slate-900/60 ${colorTheme}">
-            <span class="matrix-input">${percentage}%</span>
-            <span class="print-span hidden text-black font-bold">${percentage}%</span>
-          </td>
-        `;
-      });
-      bodyHTML += `</tr>`;
-
-      tableBody.innerHTML = bodyHTML;
-
-      // Attach direct event modifications and actions
-      document.querySelectorAll('.matrix-input').forEach(input => {
-        input.addEventListener('change', (e) => {
-          const habitId = e.target.getAttribute('data-habit');
-          const dateStr = e.target.getAttribute('data-date');
-          updateMatrixMetricCell(habitId, dateStr, e.target.value);
-        });
-      });
-
-      // Bind the sets triggers (＋) buttons
-      document.querySelectorAll('.sets-trigger-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const hId = btn.getAttribute('data-habit');
-          const dStr = btn.getAttribute('data-date');
-          const hName = btn.getAttribute('data-habit-name');
-          openSetsRecordModal(hId, dStr, hName);
-        });
-      });
-
-      drawTrendsChartSpline();
-    }
-
-    // Process cell mutations and schedule notifications/sounds
-    function updateMatrixMetricCell(habitId, dateStr, value) {
-      const previouslyCompleted = getCellValue(habitId, dateStr).trim().length > 0;
-      const originalScore = getDailyScore(dateStr);
-
-      trackerState[`${habitId}_${dateStr}`] = value;
-      localStorage.setItem('gr_matrix_v5_state', JSON.stringify(trackerState));
-
-      if (habitId === 'no_junk_food' && value.includes('Junk')) {
-        playAlertTone();
-        renderSystemToast("Junk Food Logged ❌", "Discipline reset! Keep tracking forward.", "error");
-      } else if (value.trim().length > 0 && !previouslyCompleted) {
-        playSuccessTone();
-      }
-
-      // Synchronize database
-      pushLocalChangesToCloud();
-      renderMatrixSpreadsheet();
-
-      // Check for perfect score celebration trigger
-      const newScore = getDailyScore(dateStr);
-      if (newScore === TRAINED_HABITS.length && originalScore < TRAINED_HABITS.length) {
-        triggerPerfectDayCelebration();
-        renderSystemToast("100% PERFECT DAY ⚡", "Discipline complete for this cohort date! Phenomenal job.", "success");
-      }
-    }
-
-    // Dynamic curve SVG renderer for progress tracker
-    function drawTrendsChartSpline() {
-      const container = document.getElementById('svgContainer');
-      if (!container) return;
-
-      const width = container.clientWidth;
-      const height = container.clientHeight;
-      if (width === 0 || height === 0) return;
-
-      const points = [];
-      const padX = 40;
-      const padY = 25;
-
-      const drawableWidth = width - (padX * 2);
-      const drawableHeight = height - (padY * 2);
-      const stepX = drawableWidth / (COHORT_DAYS - 1);
-
-      timelineDates.forEach((date, index) => {
-        const dStr = getLocalDateStr(date);
-        const score = getDailyScore(dStr);
-        const pct = score / TRAINED_HABITS.length;
-
-        const x = padX + (index * stepX);
-        const y = padY + (drawableHeight - (pct * drawableHeight));
-        points.push({ x, y, percentage: Math.round(pct * 100) });
-      });
-
-      // Curved Spline algorithm generator
-      let pathD = `M ${points[0].x} ${points[0].y}`;
-      if (points.length > 1) {
-        for (let i = 1; i < points.length; i++) {
-          const p0 = points[i - 1];
-          const p1 = points[i];
-          const cpX1 = p0.x + (p1.x - p0.x) / 3;
-          const cpY1 = p0.y;
-          const cpX2 = p0.x + 2 * (p1.x - p0.x) / 3;
-          const cpY2 = p1.y;
-          pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
-        }
-      }
-
-      let svgHTML = `
-        <svg width="${width}" height="${height}" class="overflow-visible pointer-events-none z-10">
-          <path d="${pathD}" fill="none" stroke="rgba(16, 185, 129, 0.08)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="${pathD}" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    function executeKickout() {
+      // 1. Wipe entire HTML DOM immediately
+      document.body.innerHTML = `
+        <div style="background:#000; color:#ff3333; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:monospace;">
+          <h1>ACCESS VIOLATION: IP RECORDED</h1>
+          <p>Mismatched credentials. Terminating session...</p>
+        </div>
       `;
 
-      points.forEach((pt) => {
-        svgHTML += `
-          <g>
-            <circle cx="${pt.x}" cy="${pt.y}" r="4.5" fill="#10B981" stroke="#030712" stroke-width="2.5" />
-            <text x="${pt.x}" y="${pt.y - 10}" text-anchor="middle" font-size="8" font-family="monospace" font-weight="bold" fill="#34D399">${pt.percentage}%</text>
-          </g>
-        `;
-      });
-
-      container.innerHTML = svgHTML + `</svg>`;
-    }
-
-    // System Alert Banner Generator
-    function renderSystemToast(title, desc, style = 'info') {
-      const container = document.getElementById('toastContainer');
-      const div = document.createElement('div');
-      
-      const themeStyles = {
-        success: 'border-emerald-500/30 text-emerald-400 bg-emerald-950/80 shadow-glow-emerald/10',
-        error: 'border-rose-500/30 text-rose-400 bg-rose-950/80 shadow-glow-rose/10',
-        info: 'border-slate-800 text-slate-200 bg-slate-900/80'
-      }[style];
-
-      div.className = `glass-panel border px-4 py-3 rounded-xl flex flex-col gap-0.5 pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 select-none ${themeStyles}`;
-      div.innerHTML = `
-        <div class="text-xs font-black uppercase tracking-wider">${title}</div>
-        <div class="text-[10px] text-slate-300 font-mono">${desc}</div>
-      `;
-
-      container.appendChild(div);
+      // 2. Clear browser state and redirect away
       setTimeout(() => {
-        div.classList.remove('translate-y-2', 'opacity-0');
-      }, 50);
-
-      setTimeout(() => {
-        div.classList.add('translate-y-2', 'opacity-0');
-        setTimeout(() => div.remove(), 300);
-      }, 3500);
-    }
-
-    // Synthesizer toggle triggers
-    const audioToggleBtn = document.getElementById('audioToggleBtn');
-    audioToggleBtn.addEventListener('click', () => {
-      audioEnabled = !audioEnabled;
-      localStorage.setItem('gr_sound_v5_active', audioEnabled);
-      audioToggleBtn.innerHTML = audioEnabled ? '🔊' : '🔇';
-      renderSystemToast(audioEnabled ? "Synth Enabled" : "Synth Muted", audioEnabled ? "Beep chimes are active." : "Sound effects turned off.", "info");
-    });
-
-    // Code input handler setup
-    const syncCodeInput = document.getElementById('syncCodeInput');
-    syncCodeInput.addEventListener('change', () => {
-      initiateDeviceSync();
-    });
-
-    // Native PDF Export handler
-    document.getElementById('exportPdfBtn').addEventListener('click', () => {
-      renderSystemToast("Preparing PDF Export", "Open print settings, and choose 'Save as PDF'. Make sure to select 'Landscape' mode.", "success");
-      setTimeout(() => {
-        window.print();
-      }, 500);
-    });
-
-    // Global Load initializations
-    window.onload = function() {
-      renderMatrixSpreadsheet();
-      
-      // Load and start device pair sync state
-      if (syncCode) {
-        syncCodeInput.value = syncCode;
-        initiateDeviceSync();
-      } else {
-        updateSyncIndicator('local');
-      }
-
-      window.addEventListener('resize', drawTrendsChartSpline);
+        window.location.replace("https://www.google.com");
+      }, 1000);
     }
   </script>
 </body>
