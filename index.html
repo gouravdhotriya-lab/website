@@ -3,11 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secured Research Notes</title>
-
+  <title>Secured Notes System</title>
   <style>
-    /* Prevent all text selection and highlighting */
-    *, *::before, *::after {
+    :root {
+      --note-font-size: 16px;
+      --note-font-weight: normal;
+      --bg: #0d1117;
+      --panel-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --accent: #238636;
+      --blue: #58a6ff;
+      --danger: #da3633;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Guest Deterrents: Applied dynamically if not admin */
+    body.guest-mode, body.guest-mode * {
       -webkit-user-select: none !important;
       -moz-user-select: none !important;
       -ms-user-select: none !important;
@@ -15,210 +38,311 @@
       -webkit-touch-callout: none !important;
     }
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #0d1117;
-      color: #c9d1d9;
-    }
+    @media print { html, body { display: none !important; } }
 
-    /* Blackout screen on print/PDF attempt */
-    @media print {
-      html, body {
-        display: none !important;
-      }
-    }
-
-    /* Lock Screen Overlay */
+    /* AUTH SCREEN */
     #auth-overlay {
       position: fixed;
       inset: 0;
-      background-color: #0b0e14;
+      background: #0b0e14;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 999999;
+      z-index: 10000;
     }
-
-    .auth-card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      padding: 30px;
+    .auth-box {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
       border-radius: 8px;
+      padding: 30px;
       width: 100%;
-      max-width: 360px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      max-width: 380px;
       text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
     }
-
-    .auth-card h2 {
-      margin-top: 0;
-      font-size: 1.25rem;
-      color: #f0f6fc;
-    }
-
-    .auth-card input {
-      width: 90%;
-      padding: 10px;
-      margin: 15px 0;
+    input, select, textarea {
       background: #0d1117;
-      border: 1px solid #30363d;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 8px 12px;
       border-radius: 6px;
-      color: #f0f6fc;
       font-size: 14px;
       outline: none;
     }
-
-    .auth-card input:focus {
-      border-color: #58a6ff;
-    }
-
+    input:focus, select:focus, textarea:focus { border-color: var(--blue); }
     .btn {
-      padding: 10px 15px;
-      background-color: #238636;
-      border: none;
+      padding: 8px 14px;
       border-radius: 6px;
-      color: #ffffff;
-      font-size: 14px;
+      border: none;
       font-weight: 600;
       cursor: pointer;
-    }
-
-    .btn:hover {
-      background-color: #2ea043;
-    }
-
-    #status-msg {
-      margin-top: 15px;
       font-size: 13px;
-      min-height: 18px;
+      color: #fff;
+      background: var(--accent);
+      transition: 0.2s;
     }
+    .btn:hover { filter: brightness(1.15); }
+    .btn-blue { background: #1f6feb; }
+    .btn-danger { background: var(--danger); }
+    .btn-secondary { background: #30363d; }
 
-    /* Main Container */
-    #main-wrapper {
-      display: none;
-      max-width: 850px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
+    /* MAIN WRAPPER */
+    #app-container { display: none; padding-bottom: 80px; }
 
-    /* Admin Control Panel */
-    #admin-panel {
-      display: none;
-      background: #1f242c;
-      border: 1px solid #388bfd;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 30px;
-    }
-
-    #admin-panel h3 {
-      margin-top: 0;
-      color: #58a6ff;
+    /* TOP NAVBAR */
+    .navbar {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      padding: 12px 24px;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 500;
     }
+    .nav-breadcrumbs { font-size: 14px; color: var(--blue); display: flex; gap: 8px; align-items: center; }
+    .nav-breadcrumbs span { cursor: pointer; text-decoration: underline; }
 
-    .admin-controls {
+    /* ADMIN TOOLBAR */
+    #admin-bar {
+      display: none;
+      background: #111b27;
+      border-bottom: 1px solid #1f6feb;
+      padding: 12px 24px;
+      font-size: 13px;
+    }
+    .toolbar-row {
       display: flex;
       flex-wrap: wrap;
       gap: 15px;
       align-items: center;
-      margin-top: 15px;
+      margin-bottom: 8px;
     }
 
-    .admin-controls select {
-      padding: 8px;
-      background: #0d1117;
-      border: 1px solid #30363d;
-      color: #fff;
-      border-radius: 6px;
-    }
-
-    .admin-controls label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    #generated-key-box {
-      margin-top: 15px;
-      padding: 12px;
-      background: #0d1117;
-      border: 1px dashed #238636;
-      border-radius: 6px;
+    /* 3-TIER WINDOW CONTAINERS */
+    .view-window {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
       display: none;
-      font-family: monospace;
-      color: #7ee787;
     }
-
-    /* Content Area */
-    #content-container {
-      background: #161b22;
-      border: 1px solid #30363d;
+    .grid-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      padding: 20px;
       border-radius: 8px;
-      padding: 30px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .card:hover { transform: translateY(-2px); border-color: var(--blue); }
+    .card h3 { margin: 0 0 8px 0; color: #f0f6fc; font-size: 18px; }
+    .card p { margin: 0; font-size: 13px; color: #8b949e; }
+
+    /* READER WINDOW (LEVEL 3) */
+    .reader-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .reader-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 15px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .page-badge {
+      background: #30363d;
+      color: #7ee787;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .reader-body {
+      font-size: var(--note-font-size);
+      font-weight: var(--note-font-weight);
+      line-height: 1.8;
+      color: #e6edf3;
+      white-space: pre-wrap;
+      outline: none;
+      min-height: 250px;
     }
 
-    #content-container h1 {
-      color: #f0f6fc;
-      margin-top: 0;
+    /* FORENSIC WATERMARK OVERLAY */
+    #watermark-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.08;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 120px 100px;
+      align-content: space-around;
+      justify-content: space-around;
+      overflow: hidden;
+    }
+    .wm-item {
+      transform: rotate(-25deg);
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+      white-space: nowrap;
     }
 
-    #content-container hr {
-      border: 0;
-      border-top: 1px solid #30363d;
-      margin: 20px 0;
+    /* ACTIVE SPOTLIGHT MASK */
+    #spotlight-mask {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 900;
+      display: none;
+      background: radial-gradient(circle 180px at -100px -100px, transparent 0%, rgba(13, 17, 23, 0.98) 100%);
+      transition: background 0.04s ease-out;
     }
+    #inactivity-curtain {
+      position: fixed;
+      inset: 0;
+      background: #0d1117;
+      z-index: 950;
+      display: none;
+    }
+
+    /* KEY MANAGEMENT MODAL */
+    #keys-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 12px;
+    }
+    #keys-table th, #keys-table td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      text-align: left;
+    }
+    #keys-table th { background: #1f242c; }
   </style>
 </head>
 <body>
 
-  <!-- Fullscreen Login Wall -->
+  <!-- Forensic Watermark Layer -->
+  <div id="watermark-layer"></div>
+
+  <!-- Inactivity Auto-Blackout -->
+  <div id="inactivity-curtain"></div>
+
+  <!-- Spotlight Peep-Hole Overlay -->
+  <div id="spotlight-mask"></div>
+
+  <!-- AUTH SCREEN -->
   <div id="auth-overlay">
-    <div class="auth-card">
-      <h2>Restricted System</h2>
-      <input type="password" id="pass-field" placeholder="Enter Access Code" autocomplete="off">
-      <button class="btn" id="submit-btn" style="width: 96%;" onclick="verifySession()">Authorize</button>
-      <div id="status-msg"></div>
+    <div class="auth-box">
+      <h2 style="margin-top:0; color:#fff;">Restricted Notes</h2>
+      <p style="font-size:13px; color:#8b949e;">Master Admin or Authorized Key Required</p>
+      <input type="password" id="pass-field" style="width:90%; margin-bottom:15px;" placeholder="Enter Access Password" autocomplete="off">
+      <button class="btn" style="width:95%;" id="login-btn" onclick="submitAuth()">Authorize Session</button>
+      <div id="auth-status" style="margin-top:12px; font-size:12px; min-height:16px;"></div>
     </div>
   </div>
 
-  <div id="main-wrapper">
-    <!-- Admin-Only Panel for Temporary Passwords -->
-    <div id="admin-panel">
-      <h3>🛡️ Admin Key Generator</h3>
-      <p style="font-size: 13px; color: #8b949e; margin: 0;">Generate an expiring, one-time passcode for another user.</p>
-      
-      <div class="admin-controls">
-        <label>
-          Duration:
-          <select id="key-duration">
-            <option value="3600">1 Hour</option>
-            <option value="21600">6 Hours</option>
-            <option value="86400">24 Hours</option>
-          </select>
-        </label>
-
-        <label>
-          <input type="checkbox" id="key-single-use" checked> Single-Use (Destroys after 1 login)
-        </label>
-
-        <button class="btn" onclick="generateTempKey()">Create Key</button>
+  <!-- MAIN APP -->
+  <div id="app-container">
+    <!-- NAVBAR -->
+    <div class="navbar">
+      <div class="nav-breadcrumbs" id="breadcrumbs">
+        <span onclick="openSubjectsView()">Subjects</span>
       </div>
-
-      <div id="generated-key-box"></div>
+      <div>
+        <button class="btn btn-secondary" onclick="logoutSession()">Logout</button>
+      </div>
     </div>
 
-    <!-- Protected Notes Section -->
-    <div id="content-container">
-      <h1>Restricted Research Notes</h1>
-      <hr>
-      <p>Place your private notes, study materials, or documentation here.</p>
+    <!-- ADMIN BAR -->
+    <div id="admin-bar">
+      <div class="toolbar-row">
+        <strong style="color:var(--blue)">Admin Control Panel</strong>
+        <label>
+          Font Size:
+          <input type="range" id="size-slider" min="12" max="28" value="16" oninput="updateFontSize(this.value)">
+          <span id="size-label">16px</span>
+        </label>
+        <label>
+          <input type="checkbox" id="bold-toggle" onchange="updateBold(this.checked)"> Bold Font
+        </label>
+        <button class="btn btn-blue" id="edit-save-btn" onclick="toggleEditMode()">Enable Edit Mode</button>
+      </div>
+      <div class="toolbar-row">
+        <strong>Create Key:</strong>
+        <input type="text" id="new-key-name" placeholder="Assigned User Name" style="width:140px;">
+        <select id="new-key-time">
+          <option value="1800">30 Minutes</option>
+          <option value="3600" selected>1 Hour</option>
+          <option value="21600">6 Hours</option>
+          <option value="86400">24 Hours</option>
+        </select>
+        <label><input type="checkbox" id="new-key-single" checked> Single-Use</label>
+        <button class="btn" onclick="createNewKey()">Generate Key</button>
+        <button class="btn btn-secondary" onclick="loadActiveKeys()">View Active Keys</button>
+      </div>
+      <div id="key-output" style="color:#7ee787; font-family:monospace; margin-top:5px;"></div>
+      <div id="keys-manager-panel" style="display:none; margin-top:10px;">
+        <table id="keys-table">
+          <thead>
+            <tr><th>Code</th><th>Name</th><th>Expires</th><th>Type</th><th>Action</th></tr>
+          </thead>
+          <tbody id="keys-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TIER 1: SUBJECTS VIEW -->
+    <div id="view-subjects" class="view-window">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Select Subject</h2>
+        <button class="btn admin-action" style="display:none;" onclick="addSubject()">+ Add Subject</button>
+      </div>
+      <div class="grid-list" id="subjects-grid"></div>
+    </div>
+
+    <!-- TIER 2: CHAPTERS VIEW -->
+    <div id="view-chapters" class="view-window">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <button class="btn btn-secondary" onclick="openSubjectsView()">← Back to Subjects</button>
+          <h2 id="chapters-subject-title" style="margin-top:10px;">Chapters</h2>
+        </div>
+        <button class="btn admin-action" style="display:none;" onclick="addChapter()">+ Add Chapter</button>
+      </div>
+      <div class="grid-list" id="chapters-grid"></div>
+    </div>
+
+    <!-- TIER 3: READER VIEW -->
+    <div id="view-reader" class="view-window">
+      <button class="btn btn-secondary" style="margin-bottom:15px;" onclick="openChaptersView(activeSubjectId)">← Back to Index</button>
+      <div class="reader-card">
+        <div class="reader-header">
+          <div>
+            <h1 id="reader-title" style="margin:0; font-size:24px;"></h1>
+            <small style="color:#8b949e;" id="reader-subject-crumb"></small>
+          </div>
+          <span class="page-badge" id="reader-page-no">Page 1</span>
+        </div>
+        <div id="reader-content" class="reader-body" contenteditable="false"></div>
+      </div>
     </div>
   </div>
 
@@ -227,72 +351,65 @@
     // CONFIGURATION
     // -------------------------------------------------------------
     const WORKER_URL = "https://notes-gatekeeper.gouravdhotriya.workers.dev";
-    let activeAdminSecret = "";
+    let state = {
+      role: null,
+      token: localStorage.getItem("session_token") || null,
+      notes: null,
+      isEditMode: false
+    };
+
+    let activeSubjectId = null;
+    let activeChapterId = null;
+    let inactivityTimer = null;
 
     // -------------------------------------------------------------
-    // CLIENT DETERRENTS (Anti-Copy / Anti-Inspect)
+    // INIT & SESSION AUTO-RESTORE
     // -------------------------------------------------------------
-    document.addEventListener("contextmenu", (e) => e.preventDefault());
-
-    document.addEventListener("keydown", (e) => {
-      const key = e.key.toLowerCase();
-      // Block Ctrl+C, Ctrl+X, Ctrl+U, Ctrl+P, Ctrl+S, Ctrl+A
-      if (e.ctrlKey && ["c", "x", "u", "p", "s", "a"].includes(key)) {
-        e.preventDefault();
-        return false;
+    window.addEventListener("DOMContentLoaded", async () => {
+      if (state.token) {
+        document.getElementById("auth-status").innerText = "Restoring session...";
+        try {
+          const res = await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "verify_session", token: state.token })
+          });
+          const data = await res.json();
+          if (data.valid) {
+            bootApplication(data.role, data.notes, data.watermark);
+            return;
+          }
+        } catch (e) {}
+        localStorage.removeItem("session_token");
       }
-      // Block F12 Inspect
-      if (e.key === "F12") {
-        e.preventDefault();
-        return false;
-      }
-    });
-
-    document.addEventListener("dragstart", (e) => e.preventDefault());
-    document.addEventListener("copy", (e) => e.preventDefault());
-
-    document.getElementById("pass-field").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") verifySession();
+      document.getElementById("auth-overlay").style.display = "flex";
     });
 
     // -------------------------------------------------------------
     // AUTHENTICATION
     // -------------------------------------------------------------
-    async function verifySession() {
-      const passInput = document.getElementById("pass-field");
-      const status = document.getElementById("status-msg");
-      const btn = document.getElementById("submit-btn");
-      const enteredPassword = passInput.value.trim();
+    async function submitAuth() {
+      const pass = document.getElementById("pass-field").value.trim();
+      const status = document.getElementById("auth-status");
+      const btn = document.getElementById("login-btn");
 
-      if (!enteredPassword) {
-        status.style.color = "#f85149";
-        status.innerText = "Password cannot be empty.";
-        return;
-      }
-
+      if (!pass) return;
       btn.disabled = true;
       status.style.color = "#8b949e";
-      status.innerText = "Verifying credentials & IP...";
+      status.innerText = "Authenticating and logging telemetry...";
 
       try {
-        const response = await fetch(WORKER_URL, {
+        const res = await fetch(WORKER_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: enteredPassword })
+          body: JSON.stringify({ action: "login", password: pass })
         });
+        const data = await res.json();
 
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          // Authentication Success
-          document.getElementById("auth-overlay").remove();
-          document.getElementById("main-wrapper").style.display = "block";
-
-          // If Admin, reveal Admin Control Panel
-          if (result.isAdmin) {
-            activeAdminSecret = enteredPassword;
-            document.getElementById("admin-panel").style.display = "block";
-          }
+        if (res.ok && data.success) {
+          localStorage.setItem("session_token", data.token);
+          state.token = data.token;
+          bootApplication(data.role, data.notes, data.watermark);
         } else {
           executeKickout();
         }
@@ -301,56 +418,327 @@
       }
     }
 
-    // -------------------------------------------------------------
-    // ADMIN: GENERATE TEMPORARY KEY
-    // -------------------------------------------------------------
-    async function generateTempKey() {
-      const durationSeconds = document.getElementById("key-duration").value;
-      const singleUse = document.getElementById("key-single-use").checked;
-      const keyBox = document.getElementById("generated-key-box");
+    function bootApplication(role, notesData, watermark) {
+      state.role = role;
+      state.notes = notesData;
+      document.getElementById("auth-overlay").remove();
+      document.getElementById("app-container").style.display = "block";
 
-      keyBox.style.display = "block";
-      keyBox.innerText = "Generating key in Cloudflare KV...";
+      // Render Dynamic Watermark
+      renderWatermark(watermark);
 
-      try {
-        const res = await fetch(WORKER_URL, {
+      // Apply Font Settings
+      if (notesData.settings) {
+        applyStyling(notesData.settings.fontSize, notesData.settings.isBold);
+      }
+
+      if (role === "ADMIN") {
+        document.getElementById("admin-bar").style.display = "block";
+        document.querySelectorAll(".admin-action").forEach(el => el.style.display = "inline-block");
+      } else {
+        // GUEST MODE: Activate anti-camera spotlight and restrictions
+        document.body.classList.add("guest-mode");
+        setupGuestSecurity();
+      }
+
+      openSubjectsView();
+    }
+
+    // -------------------------------------------------------------
+    // GUEST SECURITY & SPOTLIGHT
+    // -------------------------------------------------------------
+    function setupGuestSecurity() {
+      const mask = document.getElementById("spotlight-mask");
+      const curtain = document.getElementById("inactivity-curtain");
+      mask.style.display = "block";
+
+      // Block Inspect / Shortcuts
+      document.addEventListener("contextmenu", e => e.preventDefault());
+      document.addEventListener("keydown", e => {
+        const k = e.key.toLowerCase();
+        if (e.ctrlKey && ["c", "x", "u", "p", "s", "a"].includes(k)) e.preventDefault();
+        if (e.key === "F12") e.preventDefault();
+      });
+
+      // Spotlight tracking
+      function moveSpotlight(x, y) {
+        mask.style.background = `radial-gradient(circle 180px at ${x}px ${y}px, transparent 0%, rgba(13, 17, 23, 0.98) 100%)`;
+        curtain.style.display = "none";
+        resetInactivity();
+      }
+
+      document.addEventListener("mousemove", e => moveSpotlight(e.clientX, e.clientY));
+      document.addEventListener("touchmove", e => {
+        if (e.touches[0]) moveSpotlight(e.touches[0].clientX, e.touches[0].clientY);
+      });
+
+      function resetInactivity() {
+        clearTimeout(inactivityTimer);
+        // Snap to blackout after 3.5 seconds of immobility
+        inactivityTimer = setTimeout(() => {
+          curtain.style.display = "block";
+        }, 3500);
+      }
+      resetInactivity();
+    }
+
+    function renderWatermark(wm) {
+      const layer = document.getElementById("watermark-layer");
+      layer.innerHTML = "";
+      const text = `${wm.name} • ${wm.ip} • ${wm.date}`;
+      for (let i = 0; i < 40; i++) {
+        const span = document.createElement("div");
+        span.className = "wm-item";
+        span.innerText = text;
+        layer.appendChild(span);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 3-TIER NAVIGATION
+    // -------------------------------------------------------------
+    function openSubjectsView() {
+      activeSubjectId = null;
+      activeChapterId = null;
+      hideAllWindows();
+      document.getElementById("view-subjects").style.display = "block";
+      document.getElementById("breadcrumbs").innerHTML = `<span onclick="openSubjectsView()">Subjects</span>`;
+
+      const grid = document.getElementById("subjects-grid");
+      grid.innerHTML = "";
+      state.notes.subjects.forEach(sub => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${sub.title}</h3>
+          <p>${sub.chapters.length} Chapters Cataloged</p>
+        `;
+        card.onclick = () => openChaptersView(sub.id);
+        grid.appendChild(card);
+      });
+    }
+
+    function openChaptersView(subjectId) {
+      activeSubjectId = subjectId;
+      activeChapterId = null;
+      hideAllWindows();
+      document.getElementById("view-chapters").style.display = "block";
+
+      const subject = state.notes.subjects.find(s => s.id === subjectId);
+      document.getElementById("chapters-subject-title").innerText = subject.title;
+      document.getElementById("breadcrumbs").innerHTML = `
+        <span onclick="openSubjectsView()">Subjects</span> &gt;
+        <span onclick="openChaptersView('${subject.id}')">${subject.title}</span>
+      `;
+
+      const grid = document.getElementById("chapters-grid");
+      grid.innerHTML = "";
+      subject.chapters.forEach(ch => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <span class="page-badge" style="float:right;">Page ${ch.pageNo}</span>
+          <h3>${ch.title}</h3>
+          <p>${ch.content.substring(0, 50)}...</p>
+        `;
+        card.onclick = () => openReaderView(subject.id, ch.id);
+        grid.appendChild(card);
+      });
+    }
+
+    function openReaderView(subjectId, chapterId) {
+      activeSubjectId = subjectId;
+      activeChapterId = chapterId;
+      hideAllWindows();
+      document.getElementById("view-reader").style.display = "block";
+
+      const subject = state.notes.subjects.find(s => s.id === subjectId);
+      const chapter = subject.chapters.find(c => c.id === chapterId);
+
+      document.getElementById("breadcrumbs").innerHTML = `
+        <span onclick="openSubjectsView()">Subjects</span> &gt;
+        <span onclick="openChaptersView('${subject.id}')">${subject.title}</span> &gt;
+        <span>${chapter.title}</span>
+      `;
+
+      document.getElementById("reader-title").innerText = chapter.title;
+      document.getElementById("reader-subject-crumb").innerText = subject.title;
+      document.getElementById("reader-page-no").innerText = `Page ${chapter.pageNo}`;
+      
+      const contentEl = document.getElementById("reader-content");
+      contentEl.innerText = chapter.content;
+      contentEl.contentEditable = state.isEditMode ? "true" : "false";
+    }
+
+    function hideAllWindows() {
+      document.querySelectorAll(".view-window").forEach(w => w.style.display = "none");
+    }
+
+    // -------------------------------------------------------------
+    // ADMIN ACTIONS & LIVE KV SYNC
+    // -------------------------------------------------------------
+    function updateFontSize(val) {
+      document.documentElement.style.setProperty("--note-font-size", val + "px");
+      document.getElementById("size-label").innerText = val + "px";
+      if (!state.notes.settings) state.notes.settings = {};
+      state.notes.settings.fontSize = parseInt(val);
+    }
+
+    function updateBold(isBold) {
+      document.documentElement.style.setProperty("--note-font-weight", isBold ? "bold" : "normal");
+      if (!state.notes.settings) state.notes.settings = {};
+      state.notes.settings.isBold = isBold;
+    }
+
+    function applyStyling(fontSize, isBold) {
+      if (fontSize) {
+        document.documentElement.style.setProperty("--note-font-size", fontSize + "px");
+        document.getElementById("size-slider").value = fontSize;
+        document.getElementById("size-label").innerText = fontSize + "px";
+      }
+      if (isBold !== undefined) {
+        document.documentElement.style.setProperty("--note-font-weight", isBold ? "bold" : "normal");
+        document.getElementById("bold-toggle").checked = isBold;
+      }
+    }
+
+    async function toggleEditMode() {
+      const btn = document.getElementById("edit-save-btn");
+      if (!state.isEditMode) {
+        state.isEditMode = true;
+        btn.innerText = "💾 Save Changes to KV";
+        btn.className = "btn btn-danger";
+        if (activeChapterId) document.getElementById("reader-content").contentEditable = "true";
+      } else {
+        // Save current open reader chapter
+        if (activeSubjectId && activeChapterId) {
+          const sub = state.notes.subjects.find(s => s.id === activeSubjectId);
+          const ch = sub.chapters.find(c => c.id === activeChapterId);
+          ch.content = document.getElementById("reader-content").innerText;
+        }
+
+        btn.innerText = "Syncing...";
+        btn.disabled = true;
+
+        await fetch(WORKER_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "create_temp_key",
-            adminPassword: activeAdminSecret,
-            durationSeconds: durationSeconds,
-            singleUse: singleUse
-          })
+          body: JSON.stringify({ action: "save_notes", token: state.token, notes: state.notes })
         });
 
-        const data = await res.json();
-        if (data.success) {
-          keyBox.innerHTML = `
-            <strong>Generated Key:</strong> <span style="font-size: 16px; color:#58a6ff;">${data.tempPassword}</span><br>
-            <strong>Lifespan:</strong> ${data.expiresInMinutes} Minutes<br>
-            <strong>Mode:</strong> ${data.singleUse ? "One-Time (Deletes after login)" : "Multi-Use until expired"}<br>
-            <small style="color:#8b949e;">Send this passcode to your visitor. It will not work once expired.</small>
-          `;
-        } else {
-          keyBox.innerText = "Failed to generate key.";
-        }
-      } catch (e) {
-        keyBox.innerText = "Network error while generating key.";
+        state.isEditMode = false;
+        btn.disabled = false;
+        btn.innerText = "Enable Edit Mode";
+        btn.className = "btn btn-blue";
+        if (activeChapterId) document.getElementById("reader-content").contentEditable = "false";
+        alert("All updates successfully synced to Cloudflare KV!");
       }
+    }
+
+    function addSubject() {
+      const title = prompt("Enter Subject Title:");
+      if (!title) return;
+      state.notes.subjects.push({
+        id: "sub-" + Date.now(),
+        title: title,
+        chapters: []
+      });
+      openSubjectsView();
+    }
+
+    function addChapter() {
+      const title = prompt("Enter Chapter Title:");
+      const pageNo = prompt("Enter Page Number:", "1");
+      if (!title) return;
+      const sub = state.notes.subjects.find(s => s.id === activeSubjectId);
+      sub.chapters.push({
+        id: "ch-" + Date.now(),
+        title: title,
+        pageNo: parseInt(pageNo) || 1,
+        content: "Draft your notes here in edit mode..."
+      });
+      openChaptersView(activeSubjectId);
+    }
+
+    // -------------------------------------------------------------
+    // KEY MANAGEMENT (ADMIN)
+    // -------------------------------------------------------------
+    async function createNewKey() {
+      const name = document.getElementById("new-key-name").value.trim();
+      const time = document.getElementById("new-key-time").value;
+      const single = document.getElementById("new-key-single").checked;
+      const output = document.getElementById("key-output");
+
+      if (!name) { alert("Provide an assigned user name for the key."); return; }
+      output.innerText = "Generating key...";
+
+      const res = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create_key", token: state.token, name: name, durationSeconds: time, singleUse: single })
+      });
+      const data = await res.json();
+      if (data.success) {
+        output.innerText = `Created: ${data.key.code} (Assigned to: ${data.key.name}, Expires: ${data.key.expiresAt})`;
+        document.getElementById("new-key-name").value = "";
+      }
+    }
+
+    async function loadActiveKeys() {
+      const panel = document.getElementById("keys-manager-panel");
+      panel.style.display = panel.style.display === "none" ? "block" : "none";
+      if (panel.style.display === "none") return;
+
+      const res = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "list_keys", token: state.token })
+      });
+      const data = await res.json();
+      const tbody = document.getElementById("keys-table-body");
+      tbody.innerHTML = "";
+
+      if (data.keys.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No active temporary keys.</td></tr>`;
+        return;
+      }
+
+      data.keys.forEach(k => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${k.code}</strong></td>
+          <td>${k.name}</td>
+          <td>${k.expiresAt}</td>
+          <td>${k.singleUse ? "Single-Use" : "Multi-Use"}</td>
+          <td><button class="btn btn-danger" style="padding:3px 8px; font-size:11px;" onclick="revokeKey('${k.code}')">Revoke</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function revokeKey(code) {
+      if (!confirm(`Revoke access for key ${code}?`)) return;
+      await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete_key", token: state.token, code: code })
+      });
+      loadActiveKeys();
+    }
+
+    function logoutSession() {
+      localStorage.removeItem("session_token");
+      location.reload();
     }
 
     function executeKickout() {
       document.body.innerHTML = `
         <div style="background:#000; color:#ff3333; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:monospace;">
-          <h1>ACCESS VIOLATION: IP RECORDED</h1>
-          <p>Invalid or Expired credentials. Terminating session...</p>
+          <h1>ACCESS BLOCKED: INCIDENT RECORDED</h1>
+          <p>Mismatched or Expired Credentials. Redirecting...</p>
         </div>
       `;
-
-      setTimeout(() => {
-        window.location.replace("https://www.google.com");
-      }, 1000);
+      setTimeout(() => location.replace("https://www.google.com"), 1000);
     }
   </script>
 </body>
