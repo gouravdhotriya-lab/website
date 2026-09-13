@@ -6,7 +6,7 @@
   <title>Secured Notes</title>
 
   <style>
-    /* Prevent all text selection and highlighting */
+    /* Complete text-selection lockdown */
     *, *::before, *::after {
       -webkit-user-select: none !important;
       -moz-user-select: none !important;
@@ -18,19 +18,19 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #0d1117;
       color: #c9d1d9;
     }
 
-    /* Blackout screen on print attempt */
+    /* Blackout screen on print/PDF export attempt */
     @media print {
       html, body {
         display: none !important;
       }
     }
 
-    /* Lock Screen Overlay */
+    /* Authentication Modal */
     #auth-overlay {
       position: fixed;
       inset: 0;
@@ -96,7 +96,7 @@
       min-height: 18px;
     }
 
-    /* Content Area (Hidden by Default) */
+    /* Secured Content Area */
     #content-container {
       display: none;
       max-width: 800px;
@@ -110,7 +110,7 @@
 </head>
 <body>
 
-  <!-- Fullscreen Login Wall -->
+  <!-- Lock Screen Overlay -->
   <div id="auth-overlay">
     <div class="auth-card">
       <h2>Restricted System</h2>
@@ -120,26 +120,26 @@
     </div>
   </div>
 
-  <!-- Your Protected Notes -->
+  <!-- Protected Notes (Hidden by Default) -->
   <div id="content-container">
-    <h1>Restricted Research Notes</h1>
+    <h1>Private Notes</h1>
     <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
-    <p>Place your private notes and data here. This section is completely hidden until authorized.</p>
+    <p>Your protected notes content goes here.</p>
   </div>
 
   <script>
     // -------------------------------------------------------------
-    // CONFIGURATION
+    // REPLACE THIS URL WITH YOUR DEPLOYED CLOUDFLARE WORKER LINK
     // -------------------------------------------------------------
     const WORKER_URL = "https://your-worker-name.your-subdomain.workers.dev";
 
     // -------------------------------------------------------------
     // CLIENT DETERRENTS (Anti-Copy / Anti-Inspect)
     // -------------------------------------------------------------
-    // Disable right-click context menu
+    // Disable right click context menu
     document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-    // Block keyboard shortcuts
+    // Intercept common extraction keys
     document.addEventListener("keydown", (e) => {
       const key = e.key.toLowerCase();
       // Block Ctrl+C, Ctrl+X, Ctrl+U, Ctrl+P, Ctrl+S, Ctrl+A
@@ -154,10 +154,10 @@
       }
     });
 
-    // Clear clipboard if copy triggered
+    // Strip copy events
     document.addEventListener("copy", (e) => e.preventDefault());
 
-    // Enter key listener on input field
+    // Enter key triggers verification
     document.getElementById("pass-field").addEventListener("keypress", (e) => {
       if (e.key === "Enter") verifySession();
     });
@@ -191,21 +191,21 @@
         const result = await response.json();
 
         if (response.ok && result.success) {
-          // Authentication Passed: Wipe login box and show notes
+          // Success: remove auth gate and reveal content
           document.getElementById("auth-overlay").remove();
           document.getElementById("content-container").style.display = "block";
         } else {
-          // Trigger Immediate Kickout
+          // Password mismatch: execute kickout
           executeKickout();
         }
       } catch (err) {
-        // Any request failure, blocked connection, or tampering triggers a kick
+        // Any request failure, blocked connection, or tampering triggers kickout
         executeKickout();
       }
     }
 
     function executeKickout() {
-      // 1. Wipe entire HTML DOM immediately
+      // 1. Wipe page content immediately
       document.body.innerHTML = `
         <div style="background:#000; color:#ff3333; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:monospace;">
           <h1>ACCESS VIOLATION: IP RECORDED</h1>
@@ -213,7 +213,7 @@
         </div>
       `;
 
-      // 2. Clear browser state and redirect away
+      // 2. Redirect away after 1 second
       setTimeout(() => {
         window.location.replace("https://www.google.com");
       }, 1000);
